@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Office Siege – Mission Hub</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="screen">
+
+  <h1 class="title">📍 Mission Hub</h1>
+  <p class="tagline">Select your department and prepare your loadout.</p>
+
+  <div class="map-select">
+    <button onclick="selectMap('hr')"> HR Hallway</button>
+    <button onclick="selectMap('it')"> IT Overload</button>
+  </div>
+
+  <div class="map-info">
+    <p id="mapDescription">Choose a map to see its details.</p>
+  </div>
+
+  <div class="start-button">
+    <a id="startGameLink" href="#" class="button-link disabled" id="startGameBtn">Start Game</a>
+  </div>
+
+  <a href="index.html" class="button-link back">← Exit Game</a>
+
+  <script>
+    let selectedMap = null;
+
+    function selectMap(mapId) {
+      selectedMap = mapId;
+      const descriptions = {
+        hr: "HR Hallway – Tight corridors with long-range potential.",
+        it: "IT Overload – Fast enemies and limited tower zones."
+      };
+      document.getElementById("mapDescription").textContent = descriptions[mapId];
+      document.getElementById("startGameLink").href = `maps/${mapId}.html`;
+      document.getElementById("startGameLink").classList.remove("disabled");
+    }
+  </script>
+
+</body>
+</html>
