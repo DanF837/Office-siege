@@ -3,6 +3,7 @@ body, html {
     padding: 0;
     height: 100%;
     background-color: white;
+    background: linear-gradient(145deg, #f4f4f4, #e0e0e0);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     overflow: hidden;
   }
@@ -16,6 +17,9 @@ body, html {
     text-align: center;
     opacity: 0;
     animation: fadeIn 0.6s ease forwards;
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
   }
 
   @keyframes fadeIn {
@@ -66,11 +70,12 @@ body, html {
     border-radius: 6px;
     font-size: 16px;
     margin: 10px;
-    transition: background-color 0.2s ease;
+    transition: transform 0.15s ease, background-color 0.2s ease;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
   }
   
   .button-link:hover:not(.disabled) {
+    transform: translate(-2px);
     background-color: #1a252f;
   }
   
