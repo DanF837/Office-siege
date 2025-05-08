@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Office Siege</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="data:," />
+</head>
+<body>
+    <div id="mainMenu" class="screen">
+      <h1 class="title">Office Siege</h1>
+      <p class="tagline">The printers are angry. The staplers have snapped. Defend your desk!</p>
+  
+      <div class="menu-buttons">
+        <button id="startBtn" onclick="startGame()">Start Game</button>
+        <a href="credits.html" class="button-link">Credits</a>
+      </div>
+    </div>
+  
+    <canvas id="gameCanvas" style="display: none;"></canvas>
+  
+    <!-- JavaScript files -->
+    <script src="js/map.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/tower.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+  
+</html>
