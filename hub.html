@@ -6,38 +6,70 @@
   <title>Office Siege – Mission Hub</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body class="screen">
+<body>
 
-  <h1 class="title">📍 Mission Hub</h1>
-  <p class="tagline">Select your department and prepare your loadout.</p>
+  <!-- HEADER -->
+  <header class="hub-header">
+    <h1 class="title">📍 Mission Hub</h1>
+    <p class="tagline">Select your department and prepare your loadout.</p>
+  </header>
 
-  <div class="map-select">
-    <button onclick="selectMap('hr')"> HR Hallway</button>
-    <button onclick="selectMap('it')"> IT Overload</button>
-  </div>
+  <!-- MAIN CONTENT GRID -->
+  <main class="hub-main">
+    <!-- LEFT: MAP SELECT -->
+    <section class="panel map-panel">
+      <h3>🗺 Map Select</h3>
+      <button onclick="selectMap('hr')">HR Hallway</button>
+      <button onclick="selectMap('it')">IT Overload</button>
+    </section>
 
-  <div class="map-info">
-    <p id="mapDescription">Choose a map to see its details.</p>
-  </div>
+    <!-- CENTER: OVERVIEW -->
+    <section class="panel overview-panel">
+      <h3>🖥 Overview</h3>
+      <p id="mapDescription">Select a map to see its tactical overview.</p>
+      <hr>
+      <p class="note">Latest News: New tower "Inkjet Jetpack" coming soon!</p>
+    </section>
 
-  <div class="start-button">
+    <!-- RIGHT: TOWER LOADOUT -->
+    <section class="panel tower-panel">
+      <h3>🛡 Towers</h3>
+      <div class="tower-list">
+        <div class="tower-icon" title="Coffee Cannon">
+          <img src="assets/tower/coffee_cannon.png" alt="Coffee Cannon">
+        </div>
+        <div class="tower-icon" title="Paper Shredder">
+          <img src="assets/tower/paper_shredder.png" alt="Paper Shredder">
+        </div>
+        <div class="tower-icon" title="Monitor Sniper">
+          <img src="assets/tower/monitor_sniper.png" alt="Monitor Sniper">
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="hub-footer">
+    <a href="index.html" class="button-link">← Exit Game</a>
     <a id="startGameLink" href="#" class="button-link disabled" id="startGameBtn">Start Game</a>
-  </div>
 
-  <a href="index.html" class="button-link back">← Exit Game</a>
+  </footer>
 
   <script>
     let selectedMap = null;
 
     function selectMap(mapId) {
       selectedMap = mapId;
+
       const descriptions = {
         hr: "HR Hallway – Tight corridors with long-range potential.",
         it: "IT Overload – Fast enemies and limited tower zones."
       };
+
       document.getElementById("mapDescription").textContent = descriptions[mapId];
       document.getElementById("startGameLink").href = `maps/${mapId}.html`;
       document.getElementById("startGameLink").classList.remove("disabled");
+
     }
   </script>
 
