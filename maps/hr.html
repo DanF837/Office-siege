@@ -6,10 +6,19 @@
     <title>HR Hallway</title>
     <link rel="stylesheet" href="../style.css" />
     <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+      }
       canvas {
         background: #000;
         display: block;
-        margin: 0 auto;
+        width: 100vw;
+        height: 100vh;
       }
     </style>
   </head>
@@ -20,45 +29,34 @@
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
 
-      function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
-
-      window.addEventListener("resize", () => {
-        resizeCanvas();
-      });
-
-      resizeCanvas(); // initial call
-
       const background = new Image();
       background.src = "../assets/maps/hr_background.png";
 
+      // Optional: enable when path is ready
       /*
-      const path = [
-        { x: 820, y: 470 },
-        { x: 820, y: 560 },
-        { x: 720, y: 560 },
-        { x: 720, y: 560 },
-        { x: 470, y: 560 },
-        { x: 470, y: 560 },
-        { x: 215, y: 560 },
-        { x: 215, y: 360 },
-        { x: 420, y: 360 },
-        { x: 420, y: 510 },
-        { x: 545, y: 510 },
-        { x: 545, y: 380 },
-        { x: 705, y: 380 },
-        { x: 705, y: 270 },
-        { x: 820, y: 270 },
-        { x: 820, y: 195 },
-        { x: 75, y: 195 },
-        { x: 75, y: 365 },
-        { x: 210, y: 365 },
-        { x: 210, y: 575 },
-        { x: 830, y: 575 },
-        { x: 830, y: 470 },
-      ]; */
+    const path = [
+      { x: 820, y: 470 },
+      { x: 820, y: 560 },
+      { x: 720, y: 560 },
+      { x: 470, y: 560 },
+      { x: 215, y: 560 },
+      { x: 215, y: 360 },
+      { x: 420, y: 360 },
+      { x: 420, y: 510 },
+      { x: 545, y: 510 },
+      { x: 545, y: 380 },
+      { x: 705, y: 380 },
+      { x: 705, y: 270 },
+      { x: 820, y: 270 },
+      { x: 820, y: 195 },
+      { x: 75, y: 195 },
+      { x: 75, y: 365 },
+      { x: 210, y: 365 },
+      { x: 210, y: 575 },
+      { x: 830, y: 575 },
+      { x: 830, y: 470 }
+    ];
+    */
 
       const obstacles = [
         { x: 840, y: 10, width: 70, height: 80 },
@@ -66,6 +64,14 @@
       ];
 
       const towers = [];
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        gameLoop(); // Force redraw
+      }
+
+      window.addEventListener("resize", resizeCanvas);
 
       canvas.addEventListener("click", (e) => {
         const rect = canvas.getBoundingClientRect();
@@ -78,6 +84,7 @@
       });
 
       function drawPath() {
+        if (!path) return;
         ctx.strokeStyle = "red";
         ctx.lineWidth = 4;
         ctx.beginPath();
@@ -107,7 +114,7 @@
       function gameLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-        drawPath();
+        // drawPath(); // Uncomment if you want to debug the path
         drawObstacles();
         drawTowers();
         requestAnimationFrame(gameLoop);
@@ -126,6 +133,7 @@
       }
 
       function isNearPath(x, y, buffer = 30) {
+        if (!path) return false;
         for (let i = 0; i < path.length - 1; i++) {
           const p1 = path[i];
           const p2 = path[i + 1];
@@ -156,22 +164,8 @@
       }
 
       background.onload = () => {
-        gameLoop();
+        resizeCanvas(); // Start everything
       };
-
-      function startGame() {
-        const canvas = document.getElementById("gameCanvas");
-
-        if (canvas.requestFullscreen) {
-          canvas.requestFullscreen();
-        } else if (canvas.webkitRequestFullscreen) {
-          canvas.webkitRequestFullscreen();
-        } else if (canvas.msRequestFullscreen) {
-          canvas.msRequestFullscreen();
-        }
-
-        gameLoop();
-      }
     </script>
   </body>
 </html>
