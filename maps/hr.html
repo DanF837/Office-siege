@@ -95,8 +95,8 @@
             ]; */
 
       const path = [
-        { x: 1655, y: 693 },
-        { x: 1655, y: 840 },
+        { x: 1657, y: 700 },
+        { x: 1657, y: 848 },
       ];
 
       const obstacles = [
@@ -140,16 +140,20 @@
         mouseY = e.clientY - rect.top;
       });
 
-      canvas.addEventListener("mouseup", () => {
+      canvas.addEventListener("mouseup", (e) => {
         if (isDragging && draggingTower) {
-          if (canPlaceTower(mouseX, mouseY)) {
-            towers.push({
-              x: mouseX,
-              y: mouseY,
-              type: draggingTower,
-              range: 100,
-            });
+          const rect = canvas.getBoundingClientRect();
+
+          const scaleX = canvas.width / rect.width;
+          const scaleY = canvas.height / rect.height;
+
+          const x = (e.clientX - rect.left) * scaleX;
+          const y = (e.clientY - rect.top) * scaleY;
+
+          if (canPlaceTower(x, y)) {
+            towers.push({ x, y, type: draggingTower, range: 100 });
           }
+
           isDragging = false;
           draggingTower = null;
         }
@@ -178,12 +182,6 @@
           const img = towerImages[t.type];
           if (img && img.complete) {
             ctx.drawImage(towerImages[t.type], t.x - 32, t.y - 32, 64, 64); // center the image
-          } else {
-            // fallback circle if image not loaded
-            ctx.fillStyle = "#333";
-            ctx.beginPath();
-            ctx.arc(t.x, t.y, 20, 0, Math.PI * 2);
-            ctx.fill();
           }
         });
       }
@@ -196,7 +194,7 @@
         drawTowers();
         if (isDragging && ghostImage.complete) {
           ctx.globalAlpha = 0.6;
-          ctx.drawImage(ghostImage, mouseX - 28, mouseY - 28, 56, 56);
+          ctx.drawImage(ghostImage, mouseX - 32, mouseY - 32, 64, 64);
           ctx.globalAlpha = 1.0;
         }
         requestAnimationFrame(gameLoop);
