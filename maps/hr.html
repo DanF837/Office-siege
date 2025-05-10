@@ -29,6 +29,9 @@
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
 
+      const VIRTUAL_WIDTH = 1920;
+      const VIRTUAL_HEIGHT = 1080;
+
       // Load UI HTML
       fetch("../ui.html")
         .then((res) => res.text())
@@ -55,30 +58,45 @@
           });
         });
 
+      canvas.addEventListener("click", (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / VIRTUAL_WIDTH;
+        const scaleY = canvas.height / VIRTUAL_HEIGHT;
+        const x = (e.clientX - rect.left) / scaleX;
+        const y = (e.clientY - rect.top) / scaleY;
+        console.log(`{ x: ${x}, y: ${y} },`);
+
+        if (canPlaceTower(x, y)) {
+          towers.push({ x, y, range: 100 });
+        }
+      });
+
       const background = new Image();
       background.src = "../assets/maps/hr_background.png";
 
+      /*
+            const path = [
+              { x: 850, y: 660 }, // Start at monitor (bottom-right)
+              { x: 850, y: 550 }, // Go straight up
+              { x: 100, y: 550 }, // Move left across bottom path
+              { x: 100, y: 170 }, // Go up along far left
+              { x: 820, y: 170 }, // Move right across top hallway
+              { x: 820, y: 220 }, // Slight down into top-right
+              { x: 650, y: 220 }, // Move left over cabinets
+              { x: 650, y: 310 }, // Down between the cabinets
+              { x: 500, y: 310 }, // Left under cabinets
+              { x: 500, y: 420 }, // Down again through bookshelf path
+              { x: 280, y: 420 }, // Left past plant
+              { x: 280, y: 240 }, // Up through hallway
+              { x: 100, y: 240 }, // Left to corner
+              { x: 100, y: 150 }, // Slight up
+              { x: 860, y: 150 }, // Full sweep to top-right
+              { x: 860, y: 660 }, // Drop back to monitor to complete loop
+            ]; */
+
       const path = [
-        { x: 820, y: 470 },
-        { x: 820, y: 560 },
-        { x: 720, y: 560 },
-        { x: 470, y: 560 },
-        { x: 215, y: 560 },
-        { x: 215, y: 360 },
-        { x: 420, y: 360 },
-        { x: 420, y: 510 },
-        { x: 545, y: 510 },
-        { x: 545, y: 380 },
-        { x: 705, y: 380 },
-        { x: 705, y: 270 },
-        { x: 820, y: 270 },
-        { x: 820, y: 195 },
-        { x: 75, y: 195 },
-        { x: 75, y: 365 },
-        { x: 210, y: 365 },
-        { x: 210, y: 575 },
-        { x: 830, y: 575 },
-        { x: 830, y: 470 },
+        { x: 1655, y: 693 },
+        { x: 1655, y: 840 },
       ];
 
       const obstacles = [
@@ -105,8 +123,11 @@
       towerImages.sniper.src = "../assets/tower/monitor_sniper.png";
 
       function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        canvas.width = VIRTUAL_WIDTH;
+        canvas.height = VIRTUAL_HEIGHT;
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
         gameLoop();
       }
 
