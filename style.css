@@ -1,10 +1,11 @@
 /* === GLOBAL STYLES === */
-body, html {
+body,
+html {
   margin: 0;
   padding: 0;
   height: 100%;
   background: linear-gradient(145deg, #ece5dd, #dcd2c4);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   overflow: hidden;
   color: #2c2c2c;
 
@@ -126,7 +127,7 @@ body, html {
   padding: 20px;
   border-radius: 10px;
   backdrop-filter: blur(2px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 /* === MAP SELECT PANEL === */
@@ -183,7 +184,7 @@ body, html {
   justify-content: center;
   align-items: center;
   cursor: default;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .tower-icon img {
@@ -199,4 +200,37 @@ body, html {
   align-items: center;
   gap: 20px;
   margin-top: 30px;
+}
+
+/* === GAME UI === */
+#game-ui {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: transparent;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 16px;
+  color: #333;
+  z-index: 1000;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#game-ui button {
+  background-color: transparent;
+  border: none;
+  padding: 6px 14px;
+  margin-left: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#game-ui button:hover {
+  background-color: transparent;
 }
