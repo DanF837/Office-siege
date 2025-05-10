@@ -29,25 +29,28 @@
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
 
-      /// Load the UI HTML first
+      // Load UI HTML
       fetch("../ui.html")
         .then((res) => res.text())
         .then((html) => {
           document.body.insertAdjacentHTML("beforeend", html);
 
-          // Give the DOM a tick to insert UI
-          requestAnimationFrame(() => {
-            // Now load the UI logic
-            import("../js/ui.js").then((mod) => {
-              if (typeof mod.updateUI === "function") {
-                window.startWave = mod.startWave;
-                window.togglePause = () => console.log("Pause toggled");
+          import("../js/ui.js").then((mod) => {
+            if (typeof mod.updateUI === "function") {
+              mod.updateUI();
+              window.startWave = mod.startWave;
+              window.togglePause = () => console.log("Pause toggled");
+            } else {
+              console.error("updateUI is not a function in ui.js");
+            }
+          });
 
-                // Ensure UI elements exist
-                mod.updateUI();
-              } else {
-                console.error("updateUI is not a function in ui.js");
-              }
+          // Setup drag listeners
+          document.querySelectorAll("[data-tower]").forEach((img) => {
+            img.addEventListener("dragstart", (e) => {
+              draggingTower = e.target.dataset.tower;
+              ghostImage.src = e.target.src;
+              isDragging = true;
             });
           });
         });
@@ -85,26 +88,53 @@
 
       const towers = [];
 
+      let draggingTower = null;
+      let ghostImage = new Image();
+      let isDragging = false;
+      let mouseX = 0,
+        mouseY = 0;
+
+      const towerImages = {
+        cannon: new Image(),
+        shredder: new Image(),
+        sniper: new Image(),
+      };
+
+      towerImages.cannon.src = "../assets/tower/coffee_cannon.png";
+      towerImages.shredder.src = "../assets/tower/paper_shredder.png";
+      towerImages.sniper.src = "../assets/tower/monitor_sniper.png";
+
       function resizeCanvas() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        gameLoop(); // Force redraw
+        gameLoop();
       }
 
       window.addEventListener("resize", resizeCanvas);
+      resizeCanvas();
 
-      canvas.addEventListener("click", (e) => {
+      canvas.addEventListener("mousemove", (e) => {
         const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        mouseX = e.clientX - rect.left;
+        mouseY = e.clientY - rect.top;
+      });
 
-        if (canPlaceTower(x, y)) {
-          towers.push({ x, y, range: 100 });
+      canvas.addEventListener("mouseup", () => {
+        if (isDragging && draggingTower) {
+          if (canPlaceTower(mouseX, mouseY)) {
+            towers.push({
+              x: mouseX,
+              y: mouseY,
+              type: draggingTower,
+              range: 100,
+            });
+          }
+          isDragging = false;
+          draggingTower = null;
         }
       });
 
       function drawPath() {
-        if (!path) return;
         ctx.strokeStyle = "red";
         ctx.lineWidth = 4;
         ctx.beginPath();
@@ -117,26 +147,37 @@
 
       function drawObstacles() {
         ctx.fillStyle = "rgba(120, 120, 120, 0.6)";
-        obstacles.forEach((obj) => {
-          ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-        });
+        obstacles.forEach((obj) =>
+          ctx.fillRect(obj.x, obj.y, obj.width, obj.height)
+        );
       }
 
       function drawTowers() {
         towers.forEach((t) => {
-          ctx.fillStyle = "#333";
-          ctx.beginPath();
-          ctx.arc(t.x, t.y, 20, 0, Math.PI * 2);
-          ctx.fill();
+          const img = towerImages[t.type];
+          if (img && img.complete) {
+            ctx.drawImage(towerImages[t.type], t.x - 32, t.y - 32, 64, 64); // center the image
+          } else {
+            // fallback circle if image not loaded
+            ctx.fillStyle = "#333";
+            ctx.beginPath();
+            ctx.arc(t.x, t.y, 20, 0, Math.PI * 2);
+            ctx.fill();
+          }
         });
       }
 
       function gameLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-        // drawPath(); // Uncomment if you want to debug the path
+        drawPath();
         drawObstacles();
         drawTowers();
+        if (isDragging && ghostImage.complete) {
+          ctx.globalAlpha = 0.6;
+          ctx.drawImage(ghostImage, mouseX - 28, mouseY - 28, 56, 56);
+          ctx.globalAlpha = 1.0;
+        }
         requestAnimationFrame(gameLoop);
       }
 
@@ -153,7 +194,6 @@
       }
 
       function isNearPath(x, y, buffer = 30) {
-        if (!path) return false;
         for (let i = 0; i < path.length - 1; i++) {
           const p1 = path[i];
           const p2 = path[i + 1];
@@ -183,9 +223,7 @@
         );
       }
 
-      background.onload = () => {
-        resizeCanvas(); // Start everything
-      };
+      background.onload = () => resizeCanvas();
     </script>
   </body>
 </html>
