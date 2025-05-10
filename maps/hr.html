@@ -29,34 +29,54 @@
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
 
+      /// Load the UI HTML first
+      fetch("../ui.html")
+        .then((res) => res.text())
+        .then((html) => {
+          document.body.insertAdjacentHTML("beforeend", html);
+
+          // Give the DOM a tick to insert UI
+          requestAnimationFrame(() => {
+            // Now load the UI logic
+            import("../js/ui.js").then((mod) => {
+              if (typeof mod.updateUI === "function") {
+                window.startWave = mod.startWave;
+                window.togglePause = () => console.log("Pause toggled");
+
+                // Ensure UI elements exist
+                mod.updateUI();
+              } else {
+                console.error("updateUI is not a function in ui.js");
+              }
+            });
+          });
+        });
+
       const background = new Image();
       background.src = "../assets/maps/hr_background.png";
 
-      // Optional: enable when path is ready
-      /*
-    const path = [
-      { x: 820, y: 470 },
-      { x: 820, y: 560 },
-      { x: 720, y: 560 },
-      { x: 470, y: 560 },
-      { x: 215, y: 560 },
-      { x: 215, y: 360 },
-      { x: 420, y: 360 },
-      { x: 420, y: 510 },
-      { x: 545, y: 510 },
-      { x: 545, y: 380 },
-      { x: 705, y: 380 },
-      { x: 705, y: 270 },
-      { x: 820, y: 270 },
-      { x: 820, y: 195 },
-      { x: 75, y: 195 },
-      { x: 75, y: 365 },
-      { x: 210, y: 365 },
-      { x: 210, y: 575 },
-      { x: 830, y: 575 },
-      { x: 830, y: 470 }
-    ];
-    */
+      const path = [
+        { x: 820, y: 470 },
+        { x: 820, y: 560 },
+        { x: 720, y: 560 },
+        { x: 470, y: 560 },
+        { x: 215, y: 560 },
+        { x: 215, y: 360 },
+        { x: 420, y: 360 },
+        { x: 420, y: 510 },
+        { x: 545, y: 510 },
+        { x: 545, y: 380 },
+        { x: 705, y: 380 },
+        { x: 705, y: 270 },
+        { x: 820, y: 270 },
+        { x: 820, y: 195 },
+        { x: 75, y: 195 },
+        { x: 75, y: 365 },
+        { x: 210, y: 365 },
+        { x: 210, y: 575 },
+        { x: 830, y: 575 },
+        { x: 830, y: 470 },
+      ];
 
       const obstacles = [
         { x: 840, y: 10, width: 70, height: 80 },
