@@ -32,6 +32,11 @@
       const VIRTUAL_WIDTH = 1920;
       const VIRTUAL_HEIGHT = 1080;
 
+      const offscreenCanvas = document.createElement("canvas");
+      offscreenCanvas.width = VIRTUAL_WIDTH;
+      offscreenCanvas.height = VIRTUAL_HEIGHT;
+      const offscreenCtx = offscreenCanvas.getContext("2d");
+
       // Load UI HTML
       fetch("../ui.html")
         .then((res) => res.text())
@@ -78,6 +83,21 @@
         { x: 1657, y: 785 },
         { x: 1657, y: 958 },
         { x: 427, y: 958 },
+        { x: 427, y: 608 },
+        { x: 836, y: 608 },
+        { x: 836, y: 862 },
+        { x: 1090, y: 862 },
+        { x: 1090, y: 635 },
+        { x: 1410, y: 634 },
+        { x: 1410, y: 459 },
+        { x: 1641, y: 459 },
+        { x: 1641, y: 330 },
+        { x: 150, y: 326 },
+        { x: 150, y: 610 },
+        { x: 426, y: 610 },
+        { x: 426, y: 955 },
+        { x: 1655, y: 956 },
+        { x: 1655, y: 786 },
       ];
 
       const obstacles = [
@@ -164,7 +184,7 @@
         towers.forEach((t) => {
           const img = towerImages[t.type];
           if (img && img.complete) {
-            ctx.drawImage(towerImages[t.type], t.x - 32, t.y - 32, 64, 64); // center the image
+            ctx.drawImage(towerImages[t.type], t.x - 32, t.y - 32, 64, 64);
           }
         });
       }
@@ -219,13 +239,32 @@
         );
       }
 
-      function canPlaceTower(x, y) {
+      function isOnAllowedColor(x, y) {
+        const pixel = offscreenCtx.getImageData(Math.floor(x), Math.floor(y), 1, 1).data;
+        const target = { r: 194, g: 154, b: 85 };
+        const tolerance = 10;
+
         return (
-          !isNearPath(x, y) && !isOnAnotherTower(x, y) && !isOnObstacle(x, y)
+          Math.abs(pixel[0] - target.r) <= tolerance &&
+          Math.abs(pixel[1] - target.g) <= tolerance &&
+          Math.abs(pixel[2] - target.b) <= tolerance &&
+          pixel[3] === 255
         );
       }
 
-      background.onload = () => resizeCanvas();
+      function canPlaceTower(x, y) {
+        return (
+          isOnAllowedColor(x, y) &&
+          !isNearPath(x, y) &&
+          !isOnAnotherTower(x, y) &&
+          !isOnObstacle(x, y)
+        );
+      }
+
+      background.onload = () => {
+        resizeCanvas();
+        offscreenCtx.drawImage(background, 0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+      };
     </script>
   </body>
 </html>
