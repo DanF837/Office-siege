@@ -161,7 +161,7 @@
           draggingTower = null;
         }
       });
-
+      /*
       function drawPath() {
         ctx.strokeStyle = "red";
         ctx.lineWidth = 4;
@@ -171,7 +171,7 @@
           ctx.lineTo(path[i].x, path[i].y);
         }
         ctx.stroke();
-      }
+      } */
 
       function drawObstacles() {
         ctx.fillStyle = "rgba(120, 120, 120, 0.6)";
@@ -192,7 +192,8 @@
       function gameLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-        drawPath();
+
+    /*    drawPath();  */
         drawObstacles();
         drawTowers();
         if (isDragging && ghostImage.complete) {
