@@ -60,10 +60,10 @@
 
       canvas.addEventListener("click", (e) => {
         const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / VIRTUAL_WIDTH;
-        const scaleY = canvas.height / VIRTUAL_HEIGHT;
-        const x = (e.clientX - rect.left) / scaleX;
-        const y = (e.clientY - rect.top) / scaleY;
+        const scaleX = VIRTUAL_WIDTH / rect.width;
+        const scaleY = VIRTUAL_HEIGHT / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
         console.log(`{ x: ${x}, y: ${y} },`);
 
         if (canPlaceTower(x, y)) {
@@ -74,29 +74,10 @@
       const background = new Image();
       background.src = "../assets/maps/hr_background.png";
 
-      /*
-            const path = [
-              { x: 850, y: 660 }, // Start at monitor (bottom-right)
-              { x: 850, y: 550 }, // Go straight up
-              { x: 100, y: 550 }, // Move left across bottom path
-              { x: 100, y: 170 }, // Go up along far left
-              { x: 820, y: 170 }, // Move right across top hallway
-              { x: 820, y: 220 }, // Slight down into top-right
-              { x: 650, y: 220 }, // Move left over cabinets
-              { x: 650, y: 310 }, // Down between the cabinets
-              { x: 500, y: 310 }, // Left under cabinets
-              { x: 500, y: 420 }, // Down again through bookshelf path
-              { x: 280, y: 420 }, // Left past plant
-              { x: 280, y: 240 }, // Up through hallway
-              { x: 100, y: 240 }, // Left to corner
-              { x: 100, y: 150 }, // Slight up
-              { x: 860, y: 150 }, // Full sweep to top-right
-              { x: 860, y: 660 }, // Drop back to monitor to complete loop
-            ]; */
-
       const path = [
-        { x: 1657, y: 700 },
-        { x: 1657, y: 848 },
+        { x: 1657, y: 785 },
+        { x: 1657, y: 958 },
+        { x: 427, y: 958 },
       ];
 
       const obstacles = [
@@ -136,16 +117,18 @@
 
       canvas.addEventListener("mousemove", (e) => {
         const rect = canvas.getBoundingClientRect();
-        mouseX = e.clientX - rect.left;
-        mouseY = e.clientY - rect.top;
+        const scaleX = VIRTUAL_WIDTH / rect.width;
+        const scaleY = VIRTUAL_HEIGHT / rect.height;
+        mouseX = (e.clientX - rect.left) * scaleX;
+        mouseY = (e.clientY - rect.top) * scaleY;
       });
 
       canvas.addEventListener("mouseup", (e) => {
         if (isDragging && draggingTower) {
           const rect = canvas.getBoundingClientRect();
 
-          const scaleX = canvas.width / rect.width;
-          const scaleY = canvas.height / rect.height;
+          const scaleX = VIRTUAL_WIDTH / rect.width;
+          const scaleY = VIRTUAL_HEIGHT / rect.height;
 
           const x = (e.clientX - rect.left) * scaleX;
           const y = (e.clientY - rect.top) * scaleY;
