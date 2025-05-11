@@ -29,34 +29,76 @@
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
 
+      const VIRTUAL_WIDTH = 1920;
+      const VIRTUAL_HEIGHT = 1080;
+
+      const offscreenCanvas = document.createElement("canvas");
+      offscreenCanvas.width = VIRTUAL_WIDTH;
+      offscreenCanvas.height = VIRTUAL_HEIGHT;
+      const offscreenCtx = offscreenCanvas.getContext("2d");
+
+      // Load UI HTML
+      fetch("../ui.html")
+        .then((res) => res.text())
+        .then((html) => {
+          document.body.insertAdjacentHTML("beforeend", html);
+
+          import("../js/ui.js").then((mod) => {
+            if (typeof mod.updateUI === "function") {
+              mod.updateUI();
+              window.startWave = mod.startWave;
+              window.togglePause = () => console.log("Pause toggled");
+            } else {
+              console.error("updateUI is not a function in ui.js");
+            }
+          });
+
+          // Setup drag listeners
+          document.querySelectorAll("[data-tower]").forEach((img) => {
+            img.addEventListener("dragstart", (e) => {
+              draggingTower = e.target.dataset.tower;
+              ghostImage.src = e.target.src;
+              isDragging = true;
+            });
+          });
+        });
+
+      canvas.addEventListener("click", (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = VIRTUAL_WIDTH / rect.width;
+        const scaleY = VIRTUAL_HEIGHT / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
+        console.log(`{ x: ${x}, y: ${y} },`);
+
+        if (canPlaceTower(x, y)) {
+          towers.push({ x, y, range: 100 });
+        }
+      });
+
       const background = new Image();
       background.src = "../assets/maps/hr_background.png";
 
-      // Optional: enable when path is ready
-      /*
-    const path = [
-      { x: 820, y: 470 },
-      { x: 820, y: 560 },
-      { x: 720, y: 560 },
-      { x: 470, y: 560 },
-      { x: 215, y: 560 },
-      { x: 215, y: 360 },
-      { x: 420, y: 360 },
-      { x: 420, y: 510 },
-      { x: 545, y: 510 },
-      { x: 545, y: 380 },
-      { x: 705, y: 380 },
-      { x: 705, y: 270 },
-      { x: 820, y: 270 },
-      { x: 820, y: 195 },
-      { x: 75, y: 195 },
-      { x: 75, y: 365 },
-      { x: 210, y: 365 },
-      { x: 210, y: 575 },
-      { x: 830, y: 575 },
-      { x: 830, y: 470 }
-    ];
-    */
+      const path = [
+        { x: 1657, y: 785 },
+        { x: 1657, y: 958 },
+        { x: 427, y: 958 },
+        { x: 427, y: 608 },
+        { x: 836, y: 608 },
+        { x: 836, y: 862 },
+        { x: 1090, y: 862 },
+        { x: 1090, y: 635 },
+        { x: 1410, y: 634 },
+        { x: 1410, y: 459 },
+        { x: 1641, y: 459 },
+        { x: 1641, y: 330 },
+        { x: 150, y: 326 },
+        { x: 150, y: 610 },
+        { x: 426, y: 610 },
+        { x: 426, y: 955 },
+        { x: 1655, y: 956 },
+        { x: 1655, y: 786 },
+      ];
 
       const obstacles = [
         { x: 840, y: 10, width: 70, height: 80 },
@@ -65,26 +107,62 @@
 
       const towers = [];
 
+      let draggingTower = null;
+      let ghostImage = new Image();
+      let isDragging = false;
+      let mouseX = 0,
+        mouseY = 0;
+
+      const towerImages = {
+        cannon: new Image(),
+        shredder: new Image(),
+        sniper: new Image(),
+      };
+
+      towerImages.cannon.src = "../assets/tower/coffee_cannon.png";
+      towerImages.shredder.src = "../assets/tower/paper_shredder.png";
+      towerImages.sniper.src = "../assets/tower/monitor_sniper.png";
+
       function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        gameLoop(); // Force redraw
+        canvas.width = VIRTUAL_WIDTH;
+        canvas.height = VIRTUAL_HEIGHT;
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+        gameLoop();
       }
 
       window.addEventListener("resize", resizeCanvas);
+      resizeCanvas();
 
-      canvas.addEventListener("click", (e) => {
+      canvas.addEventListener("mousemove", (e) => {
         const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        if (canPlaceTower(x, y)) {
-          towers.push({ x, y, range: 100 });
-        }
+        const scaleX = VIRTUAL_WIDTH / rect.width;
+        const scaleY = VIRTUAL_HEIGHT / rect.height;
+        mouseX = (e.clientX - rect.left) * scaleX;
+        mouseY = (e.clientY - rect.top) * scaleY;
       });
 
+      canvas.addEventListener("mouseup", (e) => {
+        if (isDragging && draggingTower) {
+          const rect = canvas.getBoundingClientRect();
+
+          const scaleX = VIRTUAL_WIDTH / rect.width;
+          const scaleY = VIRTUAL_HEIGHT / rect.height;
+
+          const x = (e.clientX - rect.left) * scaleX;
+          const y = (e.clientY - rect.top) * scaleY;
+
+          if (canPlaceTower(x, y)) {
+            towers.push({ x, y, type: draggingTower, range: 100 });
+          }
+
+          isDragging = false;
+          draggingTower = null;
+        }
+      });
+      /*
       function drawPath() {
-        if (!path) return;
         ctx.strokeStyle = "red";
         ctx.lineWidth = 4;
         ctx.beginPath();
@@ -93,30 +171,36 @@
           ctx.lineTo(path[i].x, path[i].y);
         }
         ctx.stroke();
-      }
+      } */
 
       function drawObstacles() {
         ctx.fillStyle = "rgba(120, 120, 120, 0.6)";
-        obstacles.forEach((obj) => {
-          ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-        });
+        obstacles.forEach((obj) =>
+          ctx.fillRect(obj.x, obj.y, obj.width, obj.height)
+        );
       }
 
       function drawTowers() {
         towers.forEach((t) => {
-          ctx.fillStyle = "#333";
-          ctx.beginPath();
-          ctx.arc(t.x, t.y, 20, 0, Math.PI * 2);
-          ctx.fill();
+          const img = towerImages[t.type];
+          if (img && img.complete) {
+            ctx.drawImage(towerImages[t.type], t.x - 32, t.y - 32, 64, 64);
+          }
         });
       }
 
       function gameLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-        // drawPath(); // Uncomment if you want to debug the path
+
+    /*    drawPath();  */
         drawObstacles();
         drawTowers();
+        if (isDragging && ghostImage.complete) {
+          ctx.globalAlpha = 0.6;
+          ctx.drawImage(ghostImage, mouseX - 32, mouseY - 32, 64, 64);
+          ctx.globalAlpha = 1.0;
+        }
         requestAnimationFrame(gameLoop);
       }
 
@@ -133,7 +217,6 @@
       }
 
       function isNearPath(x, y, buffer = 30) {
-        if (!path) return false;
         for (let i = 0; i < path.length - 1; i++) {
           const p1 = path[i];
           const p2 = path[i + 1];
@@ -157,14 +240,31 @@
         );
       }
 
+      function isOnAllowedColor(x, y) {
+        const pixel = offscreenCtx.getImageData(Math.floor(x), Math.floor(y), 1, 1).data;
+        const target = { r: 194, g: 154, b: 85 };
+        const tolerance = 10;
+
+        return (
+          Math.abs(pixel[0] - target.r) <= tolerance &&
+          Math.abs(pixel[1] - target.g) <= tolerance &&
+          Math.abs(pixel[2] - target.b) <= tolerance &&
+          pixel[3] === 255
+        );
+      }
+
       function canPlaceTower(x, y) {
         return (
-          !isNearPath(x, y) && !isOnAnotherTower(x, y) && !isOnObstacle(x, y)
+          isOnAllowedColor(x, y) &&
+          !isNearPath(x, y) &&
+          !isOnAnotherTower(x, y) &&
+          !isOnObstacle(x, y)
         );
       }
 
       background.onload = () => {
-        resizeCanvas(); // Start everything
+        resizeCanvas();
+        offscreenCtx.drawImage(background, 0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
       };
     </script>
   </body>

@@ -1,0 +1,135 @@
+<!-- UI Overlay -->
+<div
+  id="game-ui"
+  style="
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    font-family: 'Segoe UI', sans-serif;
+    user-select: none;
+    pointer-events: none;
+  "
+>
+  <!-- Top Bar -->
+  <div
+    style="
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 95%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(0, 0, 0, 0.65);
+      color: white;
+      padding: 26px 32px;
+      font-size: 24px;
+      font-weight: 500;
+      pointer-events: auto;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    "
+  >
+    <!-- Stats -->
+    <div style="display: flex; gap: 36px">
+      <div style="display: flex; align-items: center; gap: 6px">
+        ❤️ <span>Lives:</span> <span id="lives">20</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px">
+        💰 <span>Money:</span> <span id="money">500</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px">
+        <span>Wave:</span> <span id="wave">1</span>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div style="display: flex; gap: 12px">
+      <button
+        style="
+          padding: 6px 14px;
+          border: none;
+          border-radius: 8px;
+          background: #555;
+          color: #fff;
+        "
+        onclick="window.togglePause?.()"
+      >
+        Pause
+      </button>
+      <button
+        style="
+          padding: 10px 25px;
+          border: none;
+          border-radius: 8px;
+          background: #3c8aff;
+          color: #fff;
+        "
+        onclick="window.startWave?.()"
+      >
+        Start
+      </button>
+      <button
+        style="
+          padding: 10px 25px;
+          border: none;
+          border-radius: 8px;
+          background: #888;
+          color: #fff;
+        "
+      >
+        ⚙️
+      </button>
+    </div>
+  </div>
+
+  <!-- Tower Panel -->
+  <div
+    id="tower-panel"
+    style="
+      position: absolute;
+      top: 88px;
+      right: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 12px;
+      pointer-events: auto;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    "
+  >
+    <img
+      src="../assets/tower/coffee_cannon.png"
+      alt="Coffee Cannon"
+      title="Coffee Cannon"
+      draggable="true"
+      width="60"
+      height="60"
+      style="border-radius: 8px; cursor: grab"
+      data-tower="cannon"
+    />
+    <img
+      src="../assets/tower/paper_shredder.png"
+      alt="Paper Shredder"
+      title="Paper Shredder"
+      draggable="true"
+      width="60"
+      height="60"
+      style="border-radius: 8px; cursor: grab"
+      data-tower="shredder"
+    />
+    <img
+      src="../assets/tower/monitor_sniper.png"
+      alt="Monitor Sniper"
+      title="Monitor Sniper"
+      draggable="true"
+      width="60"
+      height="60"
+      style="border-radius: 8px; cursor: grab"
+      data-tower="sniper"
+    />
+  </div>
+</div>
