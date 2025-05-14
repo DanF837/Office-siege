@@ -37,6 +37,53 @@
       offscreenCanvas.height = VIRTUAL_HEIGHT;
       const offscreenCtx = offscreenCanvas.getContext("2d");
 
+      const enemies = [];
+      const enemySpeed = 100;
+
+      function spawnEnemy() {
+        enemies.push({
+          x: path[0].x,
+          y: path[0].y,
+          waypointIndex: 1,
+          speed: enemySpeed,
+        });
+      }
+
+      function updateEnemies(deltaTime) {
+        enemies.forEach((enemy, index) => {
+          const target = path[enemy.waypointIndex];
+          if (!target) return;
+
+          const dx = target.x - enemy.x;
+          const dy = target.y - enemy.y;
+          const dist = Math.hypot(dx, dy);
+          const moveDist = enemy.speed * deltaTime;
+
+          if (dist < moveDist) {
+            enemy.x = target.x;
+            enemy.y = target.y;
+            enemy.waypointIndex++;
+          } else {
+            enemy.x += (dx / dist) * moveDist;
+            enemy.y += (dy / dist) * moveDist;
+          }
+
+          if (enemy.waypointIndex >= path.length) {
+            enemies.splice(index, 1);
+            console.log("Enemy reached the end!");
+          }
+        });
+      }
+
+      function drawEnemies() {
+        ctx.fillStyle = "red";
+        enemies.forEach((e) => {
+          ctx.beginPath();
+          ctx.arc(e.x, e.y, 20, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
       // Load UI HTML
       fetch("../ui.html")
         .then((res) => res.text())
@@ -46,14 +93,18 @@
           import("../js/ui.js").then((mod) => {
             if (typeof mod.updateUI === "function") {
               mod.updateUI();
-              window.startWave = mod.startWave;
+              window.startWave = () => {
+                console.log("Wave started");
+                for (let i = 0; i < 5; i++) {
+                  setTimeout(spawnEnemy, i * 1000);
+                }
+              };
               window.togglePause = () => console.log("Pause toggled");
             } else {
               console.error("updateUI is not a function in ui.js");
             }
           });
 
-          // Setup drag listeners
           document.querySelectorAll("[data-tower]").forEach((img) => {
             img.addEventListener("dragstart", (e) => {
               draggingTower = e.target.dataset.tower;
@@ -123,12 +174,14 @@
       towerImages.shredder.src = "../assets/tower/paper_shredder.png";
       towerImages.sniper.src = "../assets/tower/monitor_sniper.png";
 
+      let lastTime = performance.now();
+
       function resizeCanvas() {
         canvas.width = VIRTUAL_WIDTH;
         canvas.height = VIRTUAL_HEIGHT;
         canvas.style.width = "100%";
         canvas.style.height = "100%";
-        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
         gameLoop();
       }
 
@@ -146,17 +199,13 @@
       canvas.addEventListener("mouseup", (e) => {
         if (isDragging && draggingTower) {
           const rect = canvas.getBoundingClientRect();
-
           const scaleX = VIRTUAL_WIDTH / rect.width;
           const scaleY = VIRTUAL_HEIGHT / rect.height;
-
           const x = (e.clientX - rect.left) * scaleX;
           const y = (e.clientY - rect.top) * scaleY;
-
           if (canPlaceTower(x, y)) {
             towers.push({ x, y, type: draggingTower, range: 100 });
           }
-
           isDragging = false;
           draggingTower = null;
         }
@@ -171,8 +220,8 @@
           ctx.lineTo(path[i].x, path[i].y);
         }
         ctx.stroke();
-      } */
-
+      } 
+      */
       function drawObstacles() {
         ctx.fillStyle = "rgba(120, 120, 120, 0.6)";
         obstacles.forEach((obj) =>
@@ -189,18 +238,24 @@
         });
       }
 
-      function gameLoop() {
+      function gameLoop(now = performance.now()) {
+        const deltaTime = (now - lastTime) / 1000;
+        lastTime = now;
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-    /*    drawPath();  */
         drawObstacles();
         drawTowers();
+        drawEnemies();
+        updateEnemies(deltaTime);
+
         if (isDragging && ghostImage.complete) {
           ctx.globalAlpha = 0.6;
           ctx.drawImage(ghostImage, mouseX - 32, mouseY - 32, 64, 64);
           ctx.globalAlpha = 1.0;
         }
+
         requestAnimationFrame(gameLoop);
       }
 
@@ -241,7 +296,12 @@
       }
 
       function isOnAllowedColor(x, y) {
-        const pixel = offscreenCtx.getImageData(Math.floor(x), Math.floor(y), 1, 1).data;
+        const pixel = offscreenCtx.getImageData(
+          Math.floor(x),
+          Math.floor(y),
+          1,
+          1
+        ).data;
         const target = { r: 194, g: 154, b: 85 };
         const tolerance = 10;
 
