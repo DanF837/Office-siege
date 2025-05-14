@@ -13,3 +13,8 @@ export function startWave() {
   wave++;
   updateUI();
 }
+
+export function loseLife() {
+  lives--;
+  updateUI();
+}
