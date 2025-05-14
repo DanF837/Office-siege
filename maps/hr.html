@@ -40,6 +40,8 @@
       const enemies = [];
       const enemySpeed = 100;
 
+      let waveInProgress = false;
+
       function spawnEnemy() {
         enemies.push({
           x: path[0].x,
@@ -73,6 +75,13 @@
             console.log("Enemy reached the end!");
           }
         });
+
+        if (waveInProgress && enemies.length === 0) {
+          waveInProgress = false;
+          const btn = document.getElementById("start-btn");
+          if (btn) btn.disabled = false;
+          console.log("Wave ended");
+        }
       }
 
       function drawEnemies() {
@@ -95,6 +104,11 @@
               mod.updateUI();
 
               window.startWave = () => {
+                if (waveInProgress) return;
+
+                waveInProgress = true;
+                document.getElementById("start-btn").disabled = true;
+
                 console.log("Wave started");
                 mod.startWave();
 
