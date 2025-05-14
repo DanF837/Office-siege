@@ -25,6 +25,21 @@
   <body>
     <canvas id="gameCanvas"></canvas>
 
+    <script>
+      fetch("../gameover.html")
+        .then((res) => res.text())
+        .then((html) => {
+          document.body.insertAdjacentHTML("beforeend", html);
+        });
+    </script>
+
+    <script>
+      import { showGameOver, retryGame, goHome } from "../gameover.js";
+      window.showGameOver = showGameOver;
+      window.retryGame = retryGame;
+      window.goHome = goHome;
+    </script>
+
     <script type="module">
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
@@ -76,6 +91,9 @@
 
             import("../ui.js").then(mod => {
               mod.loseLife();
+              if (mod.lives <= 0) {
+                window.showGameOver();
+              }
             });
           }
         });
