@@ -25,6 +25,21 @@
   <body>
     <canvas id="gameCanvas"></canvas>
 
+    <script>
+      fetch("../gameover.html")
+        .then((res) => res.text())
+        .then((html) => {
+          document.body.insertAdjacentHTML("beforeend", html);
+        });
+    </script>
+
+    <script>
+      import { showGameOver, retryGame, goHome } from "../gameover.js";
+      window.showGameOver = showGameOver;
+      window.retryGame = retryGame;
+      window.goHome = goHome;
+    </script>
+
     <script type="module">
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
@@ -39,6 +54,8 @@
 
       const enemies = [];
       const enemySpeed = 100;
+
+      let waveInProgress = false;
 
       function spawnEnemy() {
         enemies.push({
@@ -71,8 +88,22 @@
           if (enemy.waypointIndex >= path.length) {
             enemies.splice(index, 1);
             console.log("Enemy reached the end!");
+
+            import("../ui.js").then(mod => {
+              mod.loseLife();
+              if (mod.lives <= 0) {
+                window.showGameOver();
+              }
+            });
           }
         });
+
+        if (waveInProgress && enemies.length === 0) {
+          waveInProgress = false;
+          const btn = document.getElementById("start-btn");
+          if (btn) btn.disabled = false;
+          console.log("Wave ended");
+        }
       }
 
       function drawEnemies() {
@@ -95,6 +126,11 @@
               mod.updateUI();
 
               window.startWave = () => {
+                if (waveInProgress) return;
+
+                waveInProgress = true;
+                document.getElementById("start-btn").disabled = true;
+
                 console.log("Wave started");
                 mod.startWave();
 
