@@ -76,7 +76,7 @@
       }
 
       function drawEnemies() {
-        ctx.fillStyle = "red";
+        ctx.fillStyle = "black";
         enemies.forEach((e) => {
           ctx.beginPath();
           ctx.arc(e.x, e.y, 20, 0, Math.PI * 2);
@@ -90,15 +90,19 @@
         .then((html) => {
           document.body.insertAdjacentHTML("beforeend", html);
 
-          import("../js/ui.js").then((mod) => {
+          import("../ui.js").then((mod) => {
             if (typeof mod.updateUI === "function") {
               mod.updateUI();
+
               window.startWave = () => {
                 console.log("Wave started");
+                mod.startWave();
+
                 for (let i = 0; i < 5; i++) {
                   setTimeout(spawnEnemy, i * 1000);
                 }
               };
+
               window.togglePause = () => console.log("Pause toggled");
             } else {
               console.error("updateUI is not a function in ui.js");
