@@ -25,16 +25,41 @@
   <body>
     <canvas id="gameCanvas"></canvas>
 
-    <script>
-      fetch("../gameover.html")
-        .then((res) => res.text())
-        .then((html) => {
-          document.body.insertAdjacentHTML("beforeend", html);
-        });
-    </script>
+    <div id="game-over-screen" style="
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      color: white;
+      font-size: 32px;
+      font-family: sans-serif;
+    ">
+      <h1 style="margin-bottom: 20px;">Game Over</h1>
+      <div style="display: flex; gap: 20px;">
+        <button onclick="retryGame()" style="padding: 10px 20px;">Retry</button>
+        <button onclick="goHome()" style="padding: 10px 20px;">Home</button>
+      </div>
+    </div>
 
     <script>
-      import { showGameOver, retryGame, goHome } from "../gameover.js";
+      function showGameOver() {
+        document.getElementById("game-over-screen").style.display = "flex";
+      }
+
+      function retryGame() {
+        location.reload();
+      }
+
+      function goHome() {
+        window.location.href = "../hub.html";
+      }
+
       window.showGameOver = showGameOver;
       window.retryGame = retryGame;
       window.goHome = goHome;
@@ -92,7 +117,7 @@
             import("../ui.js").then(mod => {
               mod.loseLife();
               if (mod.lives <= 0) {
-                window.showGameOver();
+                showGameOver();
               }
             });
           }
@@ -134,7 +159,8 @@
                 console.log("Wave started");
                 mod.startWave();
 
-                for (let i = 0; i < 5; i++) {
+                // Need work out how many enemys spawn at time
+                for (let i = 0; i < 20; i++) {
                   setTimeout(spawnEnemy, i * 1000);
                 }
               };
