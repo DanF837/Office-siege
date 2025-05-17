@@ -25,6 +25,46 @@
   <body>
     <canvas id="gameCanvas"></canvas>
 
+    <div id="game-over-screen" style="
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      color: white;
+      font-size: 32px;
+      font-family: sans-serif;
+    ">
+      <h1 style="margin-bottom: 20px;">Game Over</h1>
+      <div style="display: flex; gap: 20px;">
+        <button onclick="retryGame()" style="padding: 10px 20px;">Retry</button>
+        <button onclick="goHome()" style="padding: 10px 20px;">Home</button>
+      </div>
+    </div>
+
+    <script>
+      function showGameOver() {
+        document.getElementById("game-over-screen").style.display = "flex";
+      }
+
+      function retryGame() {
+        location.reload();
+      }
+
+      function goHome() {
+        window.location.href = "../hub.html";
+      }
+
+      window.showGameOver = showGameOver;
+      window.retryGame = retryGame;
+      window.goHome = goHome;
+    </script>
+
     <script type="module">
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
@@ -37,23 +77,110 @@
       offscreenCanvas.height = VIRTUAL_HEIGHT;
       const offscreenCtx = offscreenCanvas.getContext("2d");
 
+      const enemies = [];
+      const enemySpeed = 100;
+
+      let waveInProgress = false;
+      let allEnemiesSpawned = false;
+
+      function spawnEnemy() {
+        enemies.push({
+          x: path[0].x,
+          y: path[0].y,
+          waypointIndex: 1,
+          speed: enemySpeed,
+          hp: 100,
+        });
+      }
+
+      function updateEnemies(deltaTime) {
+        for (let i = enemies.length - 1; i >= 0; i--) {
+          const enemy = enemies[i];
+          const target = path[enemy.waypointIndex];
+          if (!target) continue;
+
+          const dx = target.x - enemy.x;
+          const dy = target.y - enemy.y;
+          const dist = Math.hypot(dx, dy);
+          const moveDist = enemy.speed * deltaTime;
+
+          if (dist < moveDist) {
+            enemy.x = target.x;
+            enemy.y = target.y;
+            enemy.waypointIndex++;
+          } else {
+            enemy.x += (dx / dist) * moveDist;
+            enemy.y += (dy / dist) * moveDist;
+          }
+
+          if (enemy.hp <= 0) {
+            enemies.splice(i, 1);
+            import("../ui.js").then((mod) => mod.addMoney(50));
+            continue;
+          }
+
+          if (enemy.waypointIndex >= path.length) {
+            enemies.splice(i, 1);
+            console.log("Enemy reached the end!");
+            import("../ui.js").then((mod) => {
+              mod.loseLife();
+              if (mod.lives <= 0) showGameOver();
+              });
+            }
+          }
+
+          if (waveInProgress && allEnemiesSpawned && enemies.length === 0) {
+            waveInProgress = false;
+            allEnemiesSpawned = false;
+            const btn = document.getElementById("start-btn");
+            if (btn) btn.disabled = false;
+            console.log("Wave ended");
+          }
+        }
+
+      function drawEnemies() {
+        ctx.fillStyle = "black";
+        enemies.forEach((e) => {
+          ctx.beginPath();
+          ctx.arc(e.x, e.y, 20, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
       // Load UI HTML
       fetch("../ui.html")
         .then((res) => res.text())
         .then((html) => {
           document.body.insertAdjacentHTML("beforeend", html);
 
-          import("../js/ui.js").then((mod) => {
+          import("../ui.js").then((mod) => {
             if (typeof mod.updateUI === "function") {
               mod.updateUI();
-              window.startWave = mod.startWave;
+
+              window.startWave = () => {
+                if (waveInProgress) return;
+
+                waveInProgress = true;
+                document.getElementById("start-btn").disabled = true;
+
+                console.log("Wave started");
+                mod.startWave();
+
+                // Need work out how many enemys spawn at time
+                for (let i = 0; i < 20; i++) {
+                  setTimeout(() => {
+                    spawnEnemy();
+                    if (i === 19) allEnemiesSpawned = true;
+                  }, i * 1000);
+                }
+              };
+
               window.togglePause = () => console.log("Pause toggled");
             } else {
               console.error("updateUI is not a function in ui.js");
             }
           });
 
-          // Setup drag listeners
           document.querySelectorAll("[data-tower]").forEach((img) => {
             img.addEventListener("dragstart", (e) => {
               draggingTower = e.target.dataset.tower;
@@ -123,12 +250,14 @@
       towerImages.shredder.src = "../assets/tower/paper_shredder.png";
       towerImages.sniper.src = "../assets/tower/monitor_sniper.png";
 
+      let lastTime = performance.now();
+
       function resizeCanvas() {
         canvas.width = VIRTUAL_WIDTH;
         canvas.height = VIRTUAL_HEIGHT;
         canvas.style.width = "100%";
         canvas.style.height = "100%";
-        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
         gameLoop();
       }
 
@@ -146,17 +275,13 @@
       canvas.addEventListener("mouseup", (e) => {
         if (isDragging && draggingTower) {
           const rect = canvas.getBoundingClientRect();
-
           const scaleX = VIRTUAL_WIDTH / rect.width;
           const scaleY = VIRTUAL_HEIGHT / rect.height;
-
           const x = (e.clientX - rect.left) * scaleX;
           const y = (e.clientY - rect.top) * scaleY;
-
           if (canPlaceTower(x, y)) {
             towers.push({ x, y, type: draggingTower, range: 100 });
           }
-
           isDragging = false;
           draggingTower = null;
         }
@@ -171,8 +296,8 @@
           ctx.lineTo(path[i].x, path[i].y);
         }
         ctx.stroke();
-      } */
-
+      } 
+      */
       function drawObstacles() {
         ctx.fillStyle = "rgba(120, 120, 120, 0.6)";
         obstacles.forEach((obj) =>
@@ -189,18 +314,54 @@
         });
       }
 
-      function gameLoop() {
+      function updateTowers(deltaTime) {
+        towers.forEach((tower) => {
+          tower.cooldown = (tower.cooldown || 0) - deltaTime;
+          const stats = towerStats[tower.type] || defaultTower;
+
+          if (tower.cooldown <= 0) {
+            const target = enemies.find((e) => {
+              const dx = tower.x - e.x;
+              const dy = tower.y - e.y;
+              return Math.hypot(dx, dy) <= stats.range;
+            });
+
+            if (target) {
+              console.log(`${tower.type} shot enemy for ${stats.damage} damage`);
+              target.hp -= stats.damage;
+              tower.cooldown = stats.fireRate;
+            }
+          }
+        });
+      }
+
+      const towerStats = {
+        cannon: { range: 120, damage: 25, fireRate: 1 },
+        sniper: { range: 400, damage: 80, fireRate: 2 },
+        shredder: { range: 1500, damage: 10, fireRate: 0.25 } 
+      };
+
+      const defaultTower = { range: 100, damage: 20, fireRate: 1 };
+
+      function gameLoop(now = performance.now()) {
+        const deltaTime = (now - lastTime) / 1000;
+        lastTime = now;
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-    /*    drawPath();  */
         drawObstacles();
         drawTowers();
+        drawEnemies();
+        updateTowers(deltaTime);
+        updateEnemies(deltaTime);
+
         if (isDragging && ghostImage.complete) {
           ctx.globalAlpha = 0.6;
           ctx.drawImage(ghostImage, mouseX - 32, mouseY - 32, 64, 64);
           ctx.globalAlpha = 1.0;
         }
+
         requestAnimationFrame(gameLoop);
       }
 
@@ -241,7 +402,12 @@
       }
 
       function isOnAllowedColor(x, y) {
-        const pixel = offscreenCtx.getImageData(Math.floor(x), Math.floor(y), 1, 1).data;
+        const pixel = offscreenCtx.getImageData(
+          Math.floor(x),
+          Math.floor(y),
+          1,
+          1
+        ).data;
         const target = { r: 194, g: 154, b: 85 };
         const tolerance = 10;
 
