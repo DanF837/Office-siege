@@ -15,8 +15,7 @@ function createWindow() {
     },
   });
   win.maximize();
-  win.loadFile("index.html"); // Start at your hub page
-}
+  win.loadFile("index.html"); 
 
 app.whenReady().then(() => {
   createWindow();
