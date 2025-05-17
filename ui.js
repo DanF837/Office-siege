@@ -18,3 +18,8 @@ export function loseLife() {
   lives--;
   updateUI();
 }
+
+export function addMoney(amount) {
+  money += amount;
+  updateUI();
+}
