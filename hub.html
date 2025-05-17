@@ -19,15 +19,15 @@
       <section class="panel map-panel">
         <h3>🗺 Map Select</h3>
         <button onclick="selectMap('hr')">HR Hallway</button>
-        <button onclick="selectMap('it')">IT Overload</button>
-      </section>
+<!--        <button onclick="selectMap('it')">IT Overload</button>  -->
+      </section> 
 
       <!-- CENTER: OVERVIEW -->
       <section class="panel overview-panel">
         <h3>🖥 Overview</h3>
         <p id="mapDescription">Select a map to see its tactical overview.</p>
         <hr />
-        <p class="note">Latest News: New tower "Inkjet Jetpack" coming soon!</p>
+        <p class="note">Latest News: New map "IT Overload" coming soon!</p>
       </section>
 
       <!-- RIGHT: TOWER LOADOUT -->
@@ -66,8 +66,8 @@
         selectedMap = mapId;
 
         const descriptions = {
-          hr: "HR Hallway – Tight corridors with long-range potential.",
-          it: "IT Overload – Fast enemies and limited tower zones.",
+          hr: "HR Hallway – A winding office corridor with narrow passages and strategic corners. Ideal for long-range defense and tactical tower placement.",
+//        it: "IT Overload – Fast enemies and limited tower zones.",
         };
 
         document.getElementById("mapDescription").textContent =
