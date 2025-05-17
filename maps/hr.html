@@ -81,6 +81,7 @@
       const enemySpeed = 100;
 
       let waveInProgress = false;
+      let allEnemiesSpawned = false;
 
       function spawnEnemy() {
         enemies.push({
@@ -88,13 +89,15 @@
           y: path[0].y,
           waypointIndex: 1,
           speed: enemySpeed,
+          hp: 100,
         });
       }
 
       function updateEnemies(deltaTime) {
-        enemies.forEach((enemy, index) => {
+        for (let i = enemies.length - 1; i >= 0; i--) {
+          const enemy = enemies[i];
           const target = path[enemy.waypointIndex];
-          if (!target) return;
+          if (!target) continue;
 
           const dx = target.x - enemy.x;
           const dy = target.y - enemy.y;
@@ -110,26 +113,30 @@
             enemy.y += (dy / dist) * moveDist;
           }
 
-          if (enemy.waypointIndex >= path.length) {
-            enemies.splice(index, 1);
-            console.log("Enemy reached the end!");
-
-            import("../ui.js").then(mod => {
-              mod.loseLife();
-              if (mod.lives <= 0) {
-                showGameOver();
-              }
-            });
+          if (enemy.hp <= 0) {
+            enemies.splice(i, 1);
+            import("../ui.js").then((mod) => mod.addMoney(50));
+            continue;
           }
-        });
 
-        if (waveInProgress && enemies.length === 0) {
-          waveInProgress = false;
-          const btn = document.getElementById("start-btn");
-          if (btn) btn.disabled = false;
-          console.log("Wave ended");
+          if (enemy.waypointIndex >= path.length) {
+            enemies.splice(i, 1);
+            console.log("Enemy reached the end!");
+            import("../ui.js").then((mod) => {
+              mod.loseLife();
+              if (mod.lives <= 0) showGameOver();
+              });
+            }
+          }
+
+          if (waveInProgress && allEnemiesSpawned && enemies.length === 0) {
+            waveInProgress = false;
+            allEnemiesSpawned = false;
+            const btn = document.getElementById("start-btn");
+            if (btn) btn.disabled = false;
+            console.log("Wave ended");
+          }
         }
-      }
 
       function drawEnemies() {
         ctx.fillStyle = "black";
@@ -161,7 +168,10 @@
 
                 // Need work out how many enemys spawn at time
                 for (let i = 0; i < 20; i++) {
-                  setTimeout(spawnEnemy, i * 1000);
+                  setTimeout(() => {
+                    spawnEnemy();
+                    if (i === 19) allEnemiesSpawned = true;
+                  }, i * 1000);
                 }
               };
 
@@ -304,6 +314,35 @@
         });
       }
 
+      function updateTowers(deltaTime) {
+        towers.forEach((tower) => {
+          tower.cooldown = (tower.cooldown || 0) - deltaTime;
+          const stats = towerStats[tower.type] || defaultTower;
+
+          if (tower.cooldown <= 0) {
+            const target = enemies.find((e) => {
+              const dx = tower.x - e.x;
+              const dy = tower.y - e.y;
+              return Math.hypot(dx, dy) <= stats.range;
+            });
+
+            if (target) {
+              console.log(`${tower.type} shot enemy for ${stats.damage} damage`);
+              target.hp -= stats.damage;
+              tower.cooldown = stats.fireRate;
+            }
+          }
+        });
+      }
+
+      const towerStats = {
+        cannon: { range: 120, damage: 25, fireRate: 1 },
+        sniper: { range: 400, damage: 80, fireRate: 2 },
+        shredder: { range: 1500, damage: 10, fireRate: 0.25 } 
+      };
+
+      const defaultTower = { range: 100, damage: 20, fireRate: 1 };
+
       function gameLoop(now = performance.now()) {
         const deltaTime = (now - lastTime) / 1000;
         lastTime = now;
@@ -314,6 +353,7 @@
         drawObstacles();
         drawTowers();
         drawEnemies();
+        updateTowers(deltaTime);
         updateEnemies(deltaTime);
 
         if (isDragging && ghostImage.complete) {
