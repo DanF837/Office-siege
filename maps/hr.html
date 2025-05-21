@@ -82,6 +82,9 @@
 
       let waveInProgress = false;
       let allEnemiesSpawned = false;
+      let selectedTower = null;
+
+      const projectiles = [];
 
       function spawnEnemy() {
         enemies.push({
@@ -137,12 +140,57 @@
             console.log("Wave ended");
           }
         }
+      
+      function updateProjectiles(deltaTime) {
+        for (let i = projectiles.length - 1; i >= 0; i--) {
+          const p = projectiles[i];
+
+          if (!enemies.includes(p.target) || p.target.hp <= 0) {
+            projectiles.splice(i, 1);
+            continue;
+          }
+
+          const dx = p.target.x - p.x;
+          const dy = p.target.y - p.y;
+          const dist = Math.hypot(dx, dy);
+          const moveDist = p.speed * deltaTime;
+
+          if (dist < moveDist) {
+            p.target.hp -= p.damage;
+            projectiles.splice(i, 1);
+            continue;
+          }
+
+          p.x += (dx / dist) * moveDist;
+          p.y += (dy / dist) * moveDist;
+        }
+      }
 
       function drawEnemies() {
-        ctx.fillStyle = "black";
         enemies.forEach((e) => {
+          ctx.fillStyle = "black";
           ctx.beginPath();
           ctx.arc(e.x, e.y, 20, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Health bar background
+          const barWidth = 40;
+          const barHeight = 6;
+          const hpRatio = e.hp / 100;
+
+          ctx.fillStyle = "red";
+          ctx.fillRect(e.x - barWidth / 2, e.y - 30, barWidth, barHeight);
+
+          ctx.fillStyle = "lime";
+          ctx.fillRect(e.x - barWidth / 2, e.y - 30, barWidth * hpRatio, barHeight);        
+        });
+      }
+
+      function drawProjectiles() {
+        ctx.fillStyle = "orange";
+        projectiles.forEach((p) => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
           ctx.fill();
         });
       }
@@ -198,9 +246,14 @@
         const y = (e.clientY - rect.top) * scaleY;
         console.log(`{ x: ${x}, y: ${y} },`);
 
-        if (canPlaceTower(x, y)) {
-          towers.push({ x, y, range: 100 });
+        if (isDragging && canPlaceTower(x, y)) {
+          towers.push({ x, y, type: draggingTower });
+          isDragging = false;
+          draggingTower = null;
+          return
         }
+
+        selectedTower = towers.find((t) => Math.hypot(t.x - x, t.y - y) < 32) || null;
       });
 
       const background = new Image();
@@ -272,20 +325,6 @@
         mouseY = (e.clientY - rect.top) * scaleY;
       });
 
-      canvas.addEventListener("mouseup", (e) => {
-        if (isDragging && draggingTower) {
-          const rect = canvas.getBoundingClientRect();
-          const scaleX = VIRTUAL_WIDTH / rect.width;
-          const scaleY = VIRTUAL_HEIGHT / rect.height;
-          const x = (e.clientX - rect.left) * scaleX;
-          const y = (e.clientY - rect.top) * scaleY;
-          if (canPlaceTower(x, y)) {
-            towers.push({ x, y, type: draggingTower, range: 100 });
-          }
-          isDragging = false;
-          draggingTower = null;
-        }
-      });
       /*
       function drawPath() {
         ctx.strokeStyle = "red";
@@ -311,6 +350,14 @@
           if (img && img.complete) {
             ctx.drawImage(towerImages[t.type], t.x - 32, t.y - 32, 64, 64);
           }
+
+          if (t === selectedTower) {
+            const stats = towerStats[t.type] || defaultTower;
+            ctx.beginPath();
+            ctx.arc(t.x, t.y, stats.range, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(0, 0, 255, 0.15)";
+            ctx.fill();
+          }       
         });
       }
 
@@ -328,7 +375,13 @@
 
             if (target) {
               console.log(`${tower.type} shot enemy for ${stats.damage} damage`);
-              target.hp -= stats.damage;
+              projectiles.push({
+                x: tower.x,
+                y: tower.y,
+                target,
+                damage: stats.damage,
+                speed: 600
+              });
               tower.cooldown = stats.fireRate;
             }
           }
@@ -336,9 +389,9 @@
       }
 
       const towerStats = {
-        cannon: { range: 120, damage: 25, fireRate: 1 },
-        sniper: { range: 400, damage: 80, fireRate: 2 },
-        shredder: { range: 1500, damage: 10, fireRate: 0.25 } 
+        cannon: { range: 180, damage: 25, fireRate: 1 },
+        sniper: { range: 1070, damage: 100, fireRate: 6 },
+        shredder: { range: 180, damage: 10, fireRate: 0.25 } 
       };
 
       const defaultTower = { range: 100, damage: 20, fireRate: 1 };
@@ -353,10 +406,23 @@
         drawObstacles();
         drawTowers();
         drawEnemies();
+        updateProjectiles(deltaTime);
         updateTowers(deltaTime);
         updateEnemies(deltaTime);
+        drawProjectiles();
 
         if (isDragging && ghostImage.complete) {
+          const stats = towerStats[draggingTower] || defaultTower;
+
+          // Drawing the range circle
+          ctx.beginPath();
+          ctx.arc(mouseX, mouseY, stats.range, 0, Math.PI * 2);
+          ctx.fillStyle = canPlaceTower(mouseX, mouseY)
+            ? "rgba(0,0,0,0.2)"
+            : "rgba(255,0,0,0.3)";
+          ctx.fill();
+
+          // Drawing ghost image
           ctx.globalAlpha = 0.6;
           ctx.drawImage(ghostImage, mouseX - 32, mouseY - 32, 64, 64);
           ctx.globalAlpha = 1.0;
