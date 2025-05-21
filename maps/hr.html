@@ -25,25 +25,29 @@
   <body>
     <canvas id="gameCanvas"></canvas>
 
-    <div id="game-over-screen" style="
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.85);
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      color: white;
-      font-size: 32px;
-      font-family: sans-serif;
-    ">
-      <h1 style="margin-bottom: 20px;">Game Over</h1>
-      <div style="display: flex; gap: 20px;">
-        <button onclick="retryGame()" style="padding: 10px 20px;">Retry</button>
-        <button onclick="goHome()" style="padding: 10px 20px;">Home</button>
+    <div
+      id="game-over-screen"
+      style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.85);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        color: white;
+        font-size: 32px;
+        font-family: sans-serif;
+      "
+    >
+      <h1 style="margin-bottom: 20px">Game Over</h1>
+      <div style="display: flex; gap: 20px">
+        <button onclick="retryGame()" style="padding: 10px 20px">Retry</button>
+        <button onclick="goHome()" style="padding: 10px 20px">Home</button>
       </div>
     </div>
 
@@ -79,6 +83,8 @@
 
       const enemies = [];
       const enemySpeed = 100;
+
+      let currentWave = 0;
 
       let waveInProgress = false;
       let allEnemiesSpawned = false;
@@ -118,7 +124,7 @@
 
           if (enemy.hp <= 0) {
             enemies.splice(i, 1);
-            import("../ui.js").then((mod) => mod.addMoney(50));
+            import("../ui.js").then((mod) => mod.addMoney(1));
             continue;
           }
 
@@ -128,19 +134,24 @@
             import("../ui.js").then((mod) => {
               mod.loseLife();
               if (mod.lives <= 0) showGameOver();
-              });
-            }
-          }
-
-          if (waveInProgress && allEnemiesSpawned && enemies.length === 0) {
-            waveInProgress = false;
-            allEnemiesSpawned = false;
-            const btn = document.getElementById("start-btn");
-            if (btn) btn.disabled = false;
-            console.log("Wave ended");
+            });
           }
         }
-      
+
+        if (waveInProgress && allEnemiesSpawned && enemies.length === 0) {
+          waveInProgress = false;
+          allEnemiesSpawned = false;
+
+          // Giving user 100 for completing wave
+          import("../ui.js").then((mod) => mod.addMoney(100));
+
+
+          const btn = document.getElementById("start-btn");
+          if (btn) btn.disabled = false;
+          console.log("Wave ended");
+        }
+      }
+
       function updateProjectiles(deltaTime) {
         for (let i = projectiles.length - 1; i >= 0; i--) {
           const p = projectiles[i];
@@ -182,7 +193,12 @@
           ctx.fillRect(e.x - barWidth / 2, e.y - 30, barWidth, barHeight);
 
           ctx.fillStyle = "lime";
-          ctx.fillRect(e.x - barWidth / 2, e.y - 30, barWidth * hpRatio, barHeight);        
+          ctx.fillRect(
+            e.x - barWidth / 2,
+            e.y - 30,
+            barWidth * hpRatio,
+            barHeight
+          );
         });
       }
 
@@ -208,19 +224,41 @@
               window.startWave = () => {
                 if (waveInProgress) return;
 
+                let wave;
+                if (currentWave < 50) {
+                  wave = {
+                    count: 10 + currentWave * 2,
+                    hp: 100 + currentWave * 20,
+                    speed: Math.min(150, 100 + currentWave * 1.5),
+                  };
+                } else {
+                  wave = {
+                    count: 110 + (currentWave - 50),
+                    hp: 1100 + (currentWave - 50) * 50,
+                    speed: Math.min(220, 150 + (currentWave - 50) * 0.5),
+                  };
+                }
+
                 waveInProgress = true;
                 document.getElementById("start-btn").disabled = true;
-
-                console.log("Wave started");
+                console.log(`Wave ${currentWave + 1} started`);
                 mod.startWave();
 
-                // Need work out how many enemys spawn at time
-                for (let i = 0; i < 20; i++) {
+                for (let i = 0; i < wave.count; i++) {
                   setTimeout(() => {
-                    spawnEnemy();
-                    if (i === 19) allEnemiesSpawned = true;
-                  }, i * 1000);
+                    enemies.push({
+                      x: path[0].x,
+                      y: path[0].y,
+                      waypointIndex: 1,
+                      speed: wave.speed,
+                      hp: wave.hp,
+                    });
+
+                    if (i === wave.count - 1) allEnemiesSpawned = true;
+                  }, i * 800);
                 }
+
+                currentWave++;
               };
 
               window.togglePause = () => console.log("Pause toggled");
@@ -250,10 +288,11 @@
           towers.push({ x, y, type: draggingTower });
           isDragging = false;
           draggingTower = null;
-          return
+          return;
         }
 
-        selectedTower = towers.find((t) => Math.hypot(t.x - x, t.y - y) < 32) || null;
+        selectedTower =
+          towers.find((t) => Math.hypot(t.x - x, t.y - y) < 32) || null;
       });
 
       const background = new Image();
@@ -357,7 +396,7 @@
             ctx.arc(t.x, t.y, stats.range, 0, Math.PI * 2);
             ctx.fillStyle = "rgba(0, 0, 255, 0.15)";
             ctx.fill();
-          }       
+          }
         });
       }
 
@@ -374,13 +413,15 @@
             });
 
             if (target) {
-              console.log(`${tower.type} shot enemy for ${stats.damage} damage`);
+              console.log(
+                `${tower.type} shot enemy for ${stats.damage} damage`
+              );
               projectiles.push({
                 x: tower.x,
                 y: tower.y,
                 target,
                 damage: stats.damage,
-                speed: 600
+                speed: 600,
               });
               tower.cooldown = stats.fireRate;
             }
@@ -391,7 +432,7 @@
       const towerStats = {
         cannon: { range: 180, damage: 25, fireRate: 1 },
         sniper: { range: 1070, damage: 100, fireRate: 6 },
-        shredder: { range: 180, damage: 10, fireRate: 0.25 } 
+        shredder: { range: 180, damage: 10, fireRate: 0.25 },
       };
 
       const defaultTower = { range: 100, damage: 20, fireRate: 1 };
