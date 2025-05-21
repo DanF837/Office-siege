@@ -82,6 +82,7 @@
 
       let waveInProgress = false;
       let allEnemiesSpawned = false;
+      let selectedTower = null;
 
       function spawnEnemy() {
         enemies.push({
@@ -139,11 +140,22 @@
         }
 
       function drawEnemies() {
-        ctx.fillStyle = "black";
         enemies.forEach((e) => {
+          ctx.fillStyle = "black";
           ctx.beginPath();
           ctx.arc(e.x, e.y, 20, 0, Math.PI * 2);
           ctx.fill();
+
+          // Health bar background
+          const barWidth = 40;
+          const barHeight = 6;
+          const hpRatio = e.hp / 100;
+
+          ctx.fillStyle = "red";
+          ctx.fillRect(e.x - barWidth / 2, e.y - 30, barWidth, barHeight);
+
+          ctx.fillStyle = "lime";
+          ctx.fillRect(e.x - barWidth / 2, e.y - 30, barWidth * hpRatio, barHeight);        
         });
       }
 
@@ -198,9 +210,14 @@
         const y = (e.clientY - rect.top) * scaleY;
         console.log(`{ x: ${x}, y: ${y} },`);
 
-        if (canPlaceTower(x, y)) {
-          towers.push({ x, y, range: 100 });
+        if (isDragging && canPlaceTower(x, y)) {
+          towers.push({ x, y, type: draggingTower, range: 100 });
+          isDragging = false;
+          draggingTower = null;
+          return
         }
+
+        selectedTower = towers.find((t) => Math.hypot(t.x - x, t.y - y) < 32) || null;
       });
 
       const background = new Image();
@@ -311,6 +328,14 @@
           if (img && img.complete) {
             ctx.drawImage(towerImages[t.type], t.x - 32, t.y - 32, 64, 64);
           }
+
+          if (t === selectedTower) {
+            const stats = towerStats[t.type] || defaultTower;
+            ctx.beginPath();
+            ctx.arc(t.x, t.y, stats.range, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(0, 0, 255, 0.15)";
+            ctx.fill();
+          }       
         });
       }
 
@@ -357,6 +382,17 @@
         updateEnemies(deltaTime);
 
         if (isDragging && ghostImage.complete) {
+          const stats = towerStats[draggingTower] || defaultTower;
+
+          // Drawing the range circle
+          ctx.beginPath();
+          ctx.arc(mouseX, mouseY, stats.range, 0, Math.PI * 2);
+          ctx.fillStyle = canPlaceTower(mouseX, mouseY)
+            ? "rgba(0,0,0,0.2)"
+            : "rgba(255,0,0,0.3)";
+          ctx.fill();
+
+          // Drawing ghost image
           ctx.globalAlpha = 0.6;
           ctx.drawImage(ghostImage, mouseX - 32, mouseY - 32, 64, 64);
           ctx.globalAlpha = 1.0;
