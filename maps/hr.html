@@ -84,17 +84,6 @@
       const enemies = [];
       const enemySpeed = 100;
 
-      const totalWaves = 100;
-      const waveData = [];
-
-      for (let i = 0; i < totalWaves; i++) {
-        waveData.push({
-          count: 10 + i * 5,
-          hp: 100 + i * 30,
-          speed: 100 + 1 * 10,
-        });
-      }
-
       let currentWave = 0;
 
       let waveInProgress = false;
@@ -135,7 +124,7 @@
 
           if (enemy.hp <= 0) {
             enemies.splice(i, 1);
-            import("../ui.js").then((mod) => mod.addMoney(50));
+            import("../ui.js").then((mod) => mod.addMoney(1));
             continue;
           }
 
@@ -152,6 +141,11 @@
         if (waveInProgress && allEnemiesSpawned && enemies.length === 0) {
           waveInProgress = false;
           allEnemiesSpawned = false;
+
+          // Giving user 100 for completing wave
+          import("../ui.js").then((mod) => mod.addMoney(100));
+
+
           const btn = document.getElementById("start-btn");
           if (btn) btn.disabled = false;
           console.log("Wave ended");
@@ -228,12 +222,25 @@
               mod.updateUI();
 
               window.startWave = () => {
-                if (waveInProgress || currentWave >= waveData.length) return;
+                if (waveInProgress) return;
 
-                const wave = waveData[currentWave];
+                let wave;
+                if (currentWave < 50) {
+                  wave = {
+                    count: 10 + currentWave * 2,
+                    hp: 100 + currentWave * 20,
+                    speed: Math.min(150, 100 + currentWave * 1.5),
+                  };
+                } else {
+                  wave = {
+                    count: 110 + (currentWave - 50),
+                    hp: 1100 + (currentWave - 50) * 50,
+                    speed: Math.min(220, 150 + (currentWave - 50) * 0.5),
+                  };
+                }
+
                 waveInProgress = true;
                 document.getElementById("start-btn").disabled = true;
-
                 console.log(`Wave ${currentWave + 1} started`);
                 mod.startWave();
 
