@@ -84,6 +84,8 @@
       let allEnemiesSpawned = false;
       let selectedTower = null;
 
+      const projectiles = [];
+
       function spawnEnemy() {
         enemies.push({
           x: path[0].x,
@@ -138,6 +140,31 @@
             console.log("Wave ended");
           }
         }
+      
+      function updateProjectiles(deltaTime) {
+        for (let i = projectiles.length - 1; i >= 0; i--) {
+          const p = projectiles[i];
+
+          if (!enemies.includes(p.target) || p.target.hp <= 0) {
+            projectiles.splice(i, 1);
+            continue;
+          }
+
+          const dx = p.target.x - p.x;
+          const dy = p.target.y - p.y;
+          const dist = Math.hypot(dx, dy);
+          const moveDist = p.speed * deltaTime;
+
+          if (dist < moveDist) {
+            p.target.hp -= p.damage;
+            projectiles.splice(i, 1);
+            continue;
+          }
+
+          p.x += (dx / dist) * moveDist;
+          p.y += (dy / dist) * moveDist;
+        }
+      }
 
       function drawEnemies() {
         enemies.forEach((e) => {
@@ -156,6 +183,15 @@
 
           ctx.fillStyle = "lime";
           ctx.fillRect(e.x - barWidth / 2, e.y - 30, barWidth * hpRatio, barHeight);        
+        });
+      }
+
+      function drawProjectiles() {
+        ctx.fillStyle = "orange";
+        projectiles.forEach((p) => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+          ctx.fill();
         });
       }
 
@@ -211,7 +247,7 @@
         console.log(`{ x: ${x}, y: ${y} },`);
 
         if (isDragging && canPlaceTower(x, y)) {
-          towers.push({ x, y, type: draggingTower, range: 100 });
+          towers.push({ x, y, type: draggingTower });
           isDragging = false;
           draggingTower = null;
           return
@@ -289,20 +325,6 @@
         mouseY = (e.clientY - rect.top) * scaleY;
       });
 
-      canvas.addEventListener("mouseup", (e) => {
-        if (isDragging && draggingTower) {
-          const rect = canvas.getBoundingClientRect();
-          const scaleX = VIRTUAL_WIDTH / rect.width;
-          const scaleY = VIRTUAL_HEIGHT / rect.height;
-          const x = (e.clientX - rect.left) * scaleX;
-          const y = (e.clientY - rect.top) * scaleY;
-          if (canPlaceTower(x, y)) {
-            towers.push({ x, y, type: draggingTower, range: 100 });
-          }
-          isDragging = false;
-          draggingTower = null;
-        }
-      });
       /*
       function drawPath() {
         ctx.strokeStyle = "red";
@@ -353,7 +375,13 @@
 
             if (target) {
               console.log(`${tower.type} shot enemy for ${stats.damage} damage`);
-              target.hp -= stats.damage;
+              projectiles.push({
+                x: tower.x,
+                y: tower.y,
+                target,
+                damage: stats.damage,
+                speed: 600
+              });
               tower.cooldown = stats.fireRate;
             }
           }
@@ -361,9 +389,9 @@
       }
 
       const towerStats = {
-        cannon: { range: 120, damage: 25, fireRate: 1 },
-        sniper: { range: 400, damage: 80, fireRate: 2 },
-        shredder: { range: 1500, damage: 10, fireRate: 0.25 } 
+        cannon: { range: 180, damage: 25, fireRate: 1 },
+        sniper: { range: 1070, damage: 100, fireRate: 6 },
+        shredder: { range: 180, damage: 10, fireRate: 0.25 } 
       };
 
       const defaultTower = { range: 100, damage: 20, fireRate: 1 };
@@ -378,8 +406,10 @@
         drawObstacles();
         drawTowers();
         drawEnemies();
+        updateProjectiles(deltaTime);
         updateTowers(deltaTime);
         updateEnemies(deltaTime);
+        drawProjectiles();
 
         if (isDragging && ghostImage.complete) {
           const stats = towerStats[draggingTower] || defaultTower;
