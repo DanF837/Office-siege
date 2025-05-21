@@ -83,6 +83,12 @@
 
       const enemies = [];
       const enemySpeed = 100;
+      const enemyTypes = {
+        normal : { hp: 100, speed: 100, reward: 1 },
+        fast: { hp: 60, speed: 180, reward: 1 },
+        tank: { hp: 300, speed: 60, reward: 1 },
+        boss: { hp: 50000, speed: 40, reward: 500 },
+      }
 
       let currentWave = 0;
 
@@ -124,13 +130,12 @@
 
           if (enemy.hp <= 0) {
             enemies.splice(i, 1);
-            import("../ui.js").then((mod) => mod.addMoney(1));
+            import("../ui.js").then((mod) => mod.addMoney(enemy.reward));
             continue;
           }
 
           if (enemy.waypointIndex >= path.length) {
             enemies.splice(i, 1);
-            console.log("Enemy reached the end!");
             import("../ui.js").then((mod) => {
               mod.loseLife();
               if (mod.lives <= 0) showGameOver();
@@ -148,7 +153,6 @@
 
           const btn = document.getElementById("start-btn");
           if (btn) btn.disabled = false;
-          console.log("Wave ended");
         }
       }
 
@@ -179,7 +183,20 @@
 
       function drawEnemies() {
         enemies.forEach((e) => {
-          ctx.fillStyle = "black";
+          // For now setting colour for each enemy
+          switch (e.type) {
+            case "fast":
+              ctx.fillStyle = "cyan";
+              break;
+            case "tank":
+              ctx.fillStyle = "brown";
+              break;
+            case "boss":
+              ctx.fillStyle = "purple";
+              break;
+            default:
+              ctx.fillStyle = "black"; // This is normal 
+          }
           ctx.beginPath();
           ctx.arc(e.x, e.y, 20, 0, Math.PI * 2);
           ctx.fill();
@@ -187,18 +204,14 @@
           // Health bar background
           const barWidth = 40;
           const barHeight = 6;
-          const hpRatio = e.hp / 100;
+          const maxHp = enemyTypes[e.type]?.hp || 100;
+          const hpRatio = e.hp / maxHp;
 
           ctx.fillStyle = "red";
           ctx.fillRect(e.x - barWidth / 2, e.y - 30, barWidth, barHeight);
 
           ctx.fillStyle = "lime";
-          ctx.fillRect(
-            e.x - barWidth / 2,
-            e.y - 30,
-            barWidth * hpRatio,
-            barHeight
-          );
+          ctx.fillRect(e.x - barWidth / 2, e.y - 30, barWidth * hpRatio, barHeight);
         });
       }
 
@@ -224,24 +237,43 @@
               window.startWave = () => {
                 if (waveInProgress) return;
 
+                let type;
                 let wave;
-                if (currentWave < 50) {
+
+                if ((currentWave + 1) % 20 === 0) {
+                  // Boss wave only
+                  type = "boss";
+                  wave = {
+                    count: 1,
+                    hp: enemyTypes.boss.hp,
+                    speed: enemyTypes.boss.speed
+                  };
+                } else if (currentWave < 50) {
+                  // Early waves
+                  if ((currentWave + 1) % 5 === 0) type = "tank";
+                  else if ((currentWave + 1) % 3 === 0) type = "fast";
+                  else type = "normal";
+
                   wave = {
                     count: 10 + currentWave * 2,
-                    hp: 100 + currentWave * 20,
-                    speed: Math.min(150, 100 + currentWave * 1.5),
+                    hp: enemyTypes[type].hp,
+                    speed: enemyTypes[type].speed,
                   };
                 } else {
+                  // Harder late waves
+                  if ((currentWave + 1) % 5 === 0) type = "tank";
+                  else if ((currentWave + 1) % 3 === 0) type = "fast";
+                  else type = "normal";
+
                   wave = {
                     count: 110 + (currentWave - 50),
-                    hp: 1100 + (currentWave - 50) * 50,
-                    speed: Math.min(220, 150 + (currentWave - 50) * 0.5),
+                    hp: enemyTypes[type].hp,
+                    speed: enemyTypes[type].speed,
                   };
                 }
 
                 waveInProgress = true;
                 document.getElementById("start-btn").disabled = true;
-                console.log(`Wave ${currentWave + 1} started`);
                 mod.startWave();
 
                 for (let i = 0; i < wave.count; i++) {
@@ -252,6 +284,8 @@
                       waypointIndex: 1,
                       speed: wave.speed,
                       hp: wave.hp,
+                      type: type,
+                      reward: enemyTypes[type].reward,
                     });
 
                     if (i === wave.count - 1) allEnemiesSpawned = true;
@@ -282,7 +316,7 @@
         const scaleY = VIRTUAL_HEIGHT / rect.height;
         const x = (e.clientX - rect.left) * scaleX;
         const y = (e.clientY - rect.top) * scaleY;
-        console.log(`{ x: ${x}, y: ${y} },`);
+//        console.log(`{ x: ${x}, y: ${y} },`);
 
         if (isDragging && canPlaceTower(x, y)) {
           towers.push({ x, y, type: draggingTower });
@@ -413,9 +447,6 @@
             });
 
             if (target) {
-              console.log(
-                `${tower.type} shot enemy for ${stats.damage} damage`
-              );
               projectiles.push({
                 x: tower.x,
                 y: tower.y,
@@ -509,12 +540,7 @@
       }
 
       function isOnAllowedColor(x, y) {
-        const pixel = offscreenCtx.getImageData(
-          Math.floor(x),
-          Math.floor(y),
-          1,
-          1
-        ).data;
+        const pixel = offscreenCtx.getImageData(Math.floor(x),Math.floor(y),1,1).data;
         const target = { r: 194, g: 154, b: 85 };
         const tolerance = 10;
 

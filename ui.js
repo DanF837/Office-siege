@@ -9,7 +9,6 @@ export function updateUI() {
 }
 
 export function startWave() {
-  console.log("Wave started:", wave);
   wave++;
   updateUI();
 }
