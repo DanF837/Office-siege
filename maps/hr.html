@@ -176,18 +176,42 @@
 
         if (selectedTower) {
           const baseCost = 100;
+          const maxLevel = 10;
 
-          const rangeCost = Math.round(baseCost * Math.pow(1.5, selectedTower.rangeLevel - 1) / 10) * 10;
-          const damageCost = Math.round(baseCost * Math.pow(1.5, selectedTower.damageLevel - 1) / 10) * 10;
-          const fireRateCost = Math.round(baseCost * Math.pow(1.5, selectedTower.fireRateLevel - 1) / 10) * 10;
+          const moneyPromise = import("../ui.js").then((mod) => mod.money);
+          moneyPromise.then((money) => {
+            const levels = {
+              range: selectedTower.rangeLevel,
+              damage: selectedTower.damageLevel,
+              fireRate: selectedTower.fireRateLevel,
+            };
 
-          menu.innerHTML = `
-            <p>Upgrade Tower</p>
-            <button onclick="upgradeStat('range')" title="Increases tower range by +10 units">+Range ($${rangeCost})</button>
-            <button onclick="upgradeStat('damage')" title="Increases tower damage by +10">+Damage ($${damageCost})</button>
-            <button onclick="upgradeStat('fireRate')" title="Improves fire rate (faster shooting)">+Fire Rate ($${fireRateCost})</button>
-          `;
-          menu.style.display = "block";
+            const costs = {
+              range: levels.range >= maxLevel ? null : Math.round(baseCost * Math.pow(1.5, levels.range - 1) / 10) * 10,
+              damage: levels.damage >= maxLevel ? null : Math.round(baseCost * Math.pow(1.5, levels.damage - 1) / 10) * 10,
+              fireRate: levels.fireRate >= maxLevel ? null : Math.round(baseCost * Math.pow(1.5, levels.fireRate - 1) / 10) * 10,
+            };
+
+            const buttonHTML = (stat, label, desc) => {
+              const level = levels[stat];
+              const cost = costs[stat];
+
+              if (level >= maxLevel) {
+                return `<button disabled title="Already at max level">${label} (MAX)</button>`;
+              }
+
+              const disabled = cost > money ? "disabled style='opacity: 0.5; cursor: not-allowed;'" : "";
+              return `<button onclick="upgradeStat('${stat}')" ${disabled} title="${desc}">${label} ($${cost})</button>`;
+            };
+
+            menu.innerHTML = `
+              <p>Upgrade Tower</p>
+              ${buttonHTML("range", "+Range", "Increases tower range by +10 units")}
+              ${buttonHTML("damage", "+Damage", "Increases tower damage by +10")}
+              ${buttonHTML("fireRate", "+Fire Rate", "Improves fire rate (faster shooting)")}
+            `;
+            menu.style.display = "block";
+          });
         }
       }
 
@@ -200,17 +224,21 @@
         if (!selectedTower) return;
 
         const baseCost = 100;
+        const maxLevel = 10;
         const currentLevel = selectedTower[stat + "Level"];
+
+        if (currentLevel >= maxLevel) {
+          alert("Max upgrade level reached.");
+          return;
+        }
+
         const cost = Math.round(baseCost * Math.pow(1.5, currentLevel - 1) / 10) * 10;
 
         import("../ui.js").then((mod) => {
-          const cost = 100;
           if (mod.money >= cost) {
             mod.addMoney(-cost);
-            selectedTower[stat + "Level"]++
-            showUpgradeMenu();
-          } else {
-            alert("Not enough money!");
+            selectedTower[stat + "Level"]++;
+            showUpgradeMenu(); 
           }
         });
       };
