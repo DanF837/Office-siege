@@ -1,5 +1,5 @@
 export let lives = 20;
-export let money = 200;
+export let money = 500;
 export let wave = 0;
 
 export function updateUI() {
@@ -9,7 +9,6 @@ export function updateUI() {
 }
 
 export function startWave() {
-  console.log("Wave started:", wave);
   wave++;
   updateUI();
 }
