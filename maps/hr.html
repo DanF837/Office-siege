@@ -105,6 +105,18 @@
         boss: { hp: 50000, speed: 40, reward: 1000 },
       }
 
+      const enemySprites = {
+        normal: new Image(),
+        fast: new Image(),
+        tank: new Image(),
+        boss: new Image(),
+      };
+
+      enemySprites.normal.src = "../assets/enemy/enemy_normal.png";
+      enemySprites.fast.src = "../assets/enemy/enemy_fast.png";
+      enemySprites.tank.src = "../assets/enemy/enemy_tank.png";
+      enemySprites.boss.src = "../assets/enemy/enemy_boss.png";
+   
       let currentWave = 0;
 
       let waveInProgress = false;
@@ -270,23 +282,11 @@
 
       function drawEnemies() {
         enemies.forEach((e) => {
-          // For now setting colour for each enemy
-          switch (e.type) {
-            case "fast":
-              ctx.fillStyle = "cyan";
-              break;
-            case "tank":
-              ctx.fillStyle = "brown";
-              break;
-            case "boss":
-              ctx.fillStyle = "purple";
-              break;
-            default:
-              ctx.fillStyle = "black"; // This is normal 
+          const sprite = enemySprites[e.type] || enemySprites.normal;
+          const size = 64;
+          if (sprite.complete) {
+            ctx.drawImage(sprite, e.x - size / 2, e.y - size / 2, size, size);
           }
-          ctx.beginPath();
-          ctx.arc(e.x, e.y, 20, 0, Math.PI * 2);
-          ctx.fill();
 
           // Health bar background
           const barWidth = 40;
