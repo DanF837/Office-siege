@@ -49,6 +49,31 @@
       </div>
     </div>
 
+    <div id="pause-popup"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 9999;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: sans-serif;
+        color: white;
+        font-size: 28px;
+      ">
+      <p>Paused</p>
+      <div style="margin-top: 20px">
+        <button onclick="togglePause()" style="padding: 10px 20px; margin: 5px">Return to Game</button>
+        <button onclick="goHome()" style="padding: 10px 20px; margin: 5px">Home</button>
+      </div>
+    </div>
+
+
     <div id="upgrade-menu" 
       style="
         position: fixed;
@@ -105,11 +130,37 @@
         boss: { hp: 50000, speed: 40, reward: 1000 },
       }
 
+      const enemySprites = {
+        normal: new Image(),
+        fast: new Image(),
+        tank: new Image(),
+        boss: new Image(),
+      };
+
+      enemySprites.normal.src = "../assets/enemy/enemy_normal.png";
+      enemySprites.fast.src = "../assets/enemy/enemy_fast.png";
+      enemySprites.tank.src = "../assets/enemy/enemy_tank.png";
+      enemySprites.boss.src = "../assets/enemy/enemy_boss.png";
+   
       let currentWave = 0;
 
       let waveInProgress = false;
       let allEnemiesSpawned = false;
       let selectedTower = null;
+      let isPaused = false;
+
+      function togglePause() {
+        console.log("Paused triggered");
+        isPaused = !isPaused;
+        const popup = document.getElementById("pause-popup");
+        if (popup) popup.style.display = isPaused ? "flex": "none";
+      }
+
+      function resumeGame() {
+        isPaused = false;
+        const popup = document.getElementById("pause-popup");
+        if (popup) popup.style.display = "none";
+      }
 
       const projectiles = [];
 
@@ -124,6 +175,7 @@
       }
 
       function updateEnemies(deltaTime) {
+        if (isPaused) return;
         for (let i = enemies.length - 1; i >= 0; i--) {
           const enemy = enemies[i];
           const target = path[enemy.waypointIndex];
@@ -244,6 +296,7 @@
       };
 
       function updateProjectiles(deltaTime) {
+        if (isPaused) return;
         for (let i = projectiles.length - 1; i >= 0; i--) {
           const p = projectiles[i];
 
@@ -270,23 +323,11 @@
 
       function drawEnemies() {
         enemies.forEach((e) => {
-          // For now setting colour for each enemy
-          switch (e.type) {
-            case "fast":
-              ctx.fillStyle = "cyan";
-              break;
-            case "tank":
-              ctx.fillStyle = "brown";
-              break;
-            case "boss":
-              ctx.fillStyle = "purple";
-              break;
-            default:
-              ctx.fillStyle = "black"; // This is normal 
+          const sprite = enemySprites[e.type] || enemySprites.normal;
+          const size = 64;
+          if (sprite.complete) {
+            ctx.drawImage(sprite, e.x - size / 2, e.y - size / 2, size, size);
           }
-          ctx.beginPath();
-          ctx.arc(e.x, e.y, 20, 0, Math.PI * 2);
-          ctx.fill();
 
           // Health bar background
           const barWidth = 40;
@@ -363,28 +404,32 @@
                 document.getElementById("start-btn").disabled = true;
                 mod.startWave();
 
-                for (let i = 0; i < wave.count; i++) {
-                  setTimeout(() => {
-                    enemies.push({
-                      x: path[0].x,
-                      y: path[0].y,
-                      waypointIndex: 1,
-                      speed: wave.speed,
-                      hp: wave.hp,
-                      type: type,
-                      reward: enemyTypes[type].reward,
-                    });
+                let spawned = 0;
+                const spawnInterval = setInterval(() => {
+                  if (isPaused) return; 
 
-                    if (i === wave.count - 1) allEnemiesSpawned = true;
-                  }, i * 800);
-                }
+                  enemies.push({
+                    x: path[0].x,
+                    y: path[0].y,
+                    waypointIndex: 1,
+                    speed: wave.speed,
+                    hp: wave.hp,
+                    type: type,
+                    reward: enemyTypes[type].reward,
+                  });
+
+                  spawned++;
+                  if (spawned >= wave.count) {
+                    allEnemiesSpawned = true;
+                    clearInterval(spawnInterval);
+                  }
+                }, 800);
 
                 currentWave++;
               };
 
-              window.togglePause = () => console.log("Pause toggled");
-            } else {
-              console.error("updateUI is not a function in ui.js");
+              window.togglePause = togglePause;
+              window.resumeGame = resumeGame;
             }
           });
 
@@ -530,6 +575,7 @@
       }
 
       function updateTowers(deltaTime) {
+        if (isPaused) return;
         towers.forEach((tower) => {
           tower.cooldown = (tower.cooldown || 0) - deltaTime;
           const stats = towerStats[tower.type] || defaultTower;
@@ -568,8 +614,15 @@
       const defaultTower = { range: 100, damage: 20, fireRate: 1 };
 
       function gameLoop(now = performance.now()) {
+        if (isPaused) {
+          requestAnimationFrame(gameLoop);
+          return;
+        }
+
         const deltaTime = (now - lastTime) / 1000;
         lastTime = now;
+        const maxDelta = 0.05; // THis caps to 50ms or 20 fps
+        const safeDelta = Math.min(deltaTime, maxDelta);
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
@@ -577,9 +630,9 @@
         drawObstacles();
         drawTowers();
         drawEnemies();
-        updateProjectiles(deltaTime);
-        updateTowers(deltaTime);
-        updateEnemies(deltaTime);
+        updateProjectiles(safeDelta);
+        updateTowers(safeDelta);
+        updateEnemies(safeDelta);
         drawProjectiles();
 
         if (isDragging && ghostImage.complete) {
