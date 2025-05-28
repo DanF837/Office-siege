@@ -175,6 +175,7 @@
       }
 
       function updateEnemies(deltaTime) {
+        if (isPaused) return;
         for (let i = enemies.length - 1; i >= 0; i--) {
           const enemy = enemies[i];
           const target = path[enemy.waypointIndex];
@@ -295,6 +296,7 @@
       };
 
       function updateProjectiles(deltaTime) {
+        if (isPaused) return;
         for (let i = projectiles.length - 1; i >= 0; i--) {
           const p = projectiles[i];
 
@@ -402,21 +404,26 @@
                 document.getElementById("start-btn").disabled = true;
                 mod.startWave();
 
-                for (let i = 0; i < wave.count; i++) {
-                  setTimeout(() => {
-                    enemies.push({
-                      x: path[0].x,
-                      y: path[0].y,
-                      waypointIndex: 1,
-                      speed: wave.speed,
-                      hp: wave.hp,
-                      type: type,
-                      reward: enemyTypes[type].reward,
-                    });
+                let spawned = 0;
+                const spawnInterval = setInterval(() => {
+                  if (isPaused) return; 
 
-                    if (i === wave.count - 1) allEnemiesSpawned = true;
-                  }, i * 800);
-                }
+                  enemies.push({
+                    x: path[0].x,
+                    y: path[0].y,
+                    waypointIndex: 1,
+                    speed: wave.speed,
+                    hp: wave.hp,
+                    type: type,
+                    reward: enemyTypes[type].reward,
+                  });
+
+                  spawned++;
+                  if (spawned >= wave.count) {
+                    allEnemiesSpawned = true;
+                    clearInterval(spawnInterval);
+                  }
+                }, 800);
 
                 currentWave++;
               };
@@ -568,6 +575,7 @@
       }
 
       function updateTowers(deltaTime) {
+        if (isPaused) return;
         towers.forEach((tower) => {
           tower.cooldown = (tower.cooldown || 0) - deltaTime;
           const stats = towerStats[tower.type] || defaultTower;
@@ -613,6 +621,8 @@
 
         const deltaTime = (now - lastTime) / 1000;
         lastTime = now;
+        const maxDelta = 0.05; // THis caps to 50ms or 20 fps
+        const safeDelta = Math.min(deltaTime, maxDelta);
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
@@ -620,9 +630,9 @@
         drawObstacles();
         drawTowers();
         drawEnemies();
-        updateProjectiles(deltaTime);
-        updateTowers(deltaTime);
-        updateEnemies(deltaTime);
+        updateProjectiles(safeDelta);
+        updateTowers(safeDelta);
+        updateEnemies(safeDelta);
         drawProjectiles();
 
         if (isDragging && ghostImage.complete) {
