@@ -139,6 +139,26 @@
       </div>
     </div>
 
+    <div id="message-popup"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.85);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 10001;
+        color: white;
+        font-family: sans-serif;
+      ">
+      <p id="message-text" style="font-size: 24px; margin-bottom: 20px;"></p>
+      <button onclick="closeMessagePopup()" style="padding: 10px 20px;">OK</button>
+    </div>
+
     <script>
       let victoryShown = false;
 
@@ -178,6 +198,13 @@
       window.showGameOver = showGameOver;
       window.retryGame = retryGame;
       window.goHome = goHome;
+      window.showMessagePopup = function (text) {
+        document.getElementById("message-text").innerText = text;
+        document.getElementById("message-popup").style.display = "flex";
+      };
+      window.closeMessagePopup = function () {
+        document.getElementById("message-popup").style.display = "none";
+      };
     </script>
 
     <script type="module">
@@ -206,6 +233,12 @@
         fast: new Image(),
         tank: new Image(),
         boss: new Image(),
+      };
+
+      const towerPrices = {
+        cannon: 100,
+        shredder: 75,
+        sniper: 150,
       };
 
       enemySprites.normal.src = "../assets/enemy/enemy_normal.png";
@@ -438,7 +471,7 @@
           // Health bar background
           const barWidth = 40;
           const barHeight = 6;
-          const maxHp = enemyTypes[e.type]?.hp || 100;
+          const maxHp = e.maxHp || 100;
           const hpRatio = e.hp / maxHp;
 
           ctx.fillStyle = "red";
@@ -446,6 +479,9 @@
 
           ctx.fillStyle = "lime";
           ctx.fillRect(e.x - barWidth / 2, e.y - 30, barWidth * hpRatio, barHeight);
+
+          ctx.strokeStyle = "black";
+          ctx.strokeRect(e.x - barWidth / 2, e.y - 30, barWidth, barHeight);
         });
       }
 
@@ -515,6 +551,7 @@
                     waypointIndex: 1,
                     speed,
                     hp,
+                    maxHp: hp,
                     type,
                     reward,
                   });
@@ -551,9 +588,28 @@
         const y = (e.clientY - rect.top) * scaleY;
 
         if (isDragging && canPlaceTower(x, y)) {
-          towers.push({x, y, type: draggingTower, level: 1, rangeLevel: 1, damageLevel: 1, fireRateLevel: 1, cooldown: 0, targetMode: 'first', });          
-          isDragging = false;
-          draggingTower = null;
+          import("../ui.js").then((mod) => {
+            const price = towerPrices[draggingTower];
+            if (mod.money >= price) {
+              mod.addMoney(-price);
+              towers.push({
+                x,
+                y,
+                type: draggingTower,
+                level: 1,
+                rangeLevel: 1,
+                damageLevel: 1,
+                fireRateLevel: 1,
+                cooldown: 0,
+                targetMode: 'first',
+              });
+            } else {
+              showMessagePopup("Not enough money to place this tower.");
+            }
+            isDragging = false;
+            draggingTower = null;
+          });
+
           return;
         }
 
