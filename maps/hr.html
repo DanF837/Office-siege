@@ -505,28 +505,47 @@
               mod.updateUI();
 
               function generateWave(waveNum) {
-                let type = "normal";
-
-                let hp = Math.floor(100 * Math.pow(1.1, waveNum))
-                let speed = Math.min(200, 100 + waveNum * 1.5);
-                let count = Math.floor(10 + waveNum * 1.25);
-                let reward = Math.floor(1 + waveNum * 0.4);
-
-                if (waveNum % 5 === 0) {
-                  type = "tank";
-                } else if (waveNum % 3 === 0) {
-                  type = "fast";
-                }
-
                 if (waveNum === 25) {
-                  type = "boss";
-                  hp = 10000;
-                  speed = 40;
-                  count = 1;
-                  reward = 1000;
+                  return {
+                    enemies: [
+                      {
+                        type: "boss",
+                        hp: 10000,
+                        speed: 40,
+                        reward: 1000,
+                        count: 1
+                      }
+                    ]
+                  };
                 }
-                console.log("Wave Data:", { waveNum, type, count, hp, speed, reward });
-                return { type, count, hp, speed, reward };
+
+                const enemyTypes = ["normal", "fast", "tank"];
+                const count = Math.floor(10 + waveNum * 1.25);
+
+                const enemies = [];
+
+                for (let i = 0; i < count; i++) {
+                  const type = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+                  let hp, speed, reward;
+
+                  if (type === "normal") {
+                    hp = Math.floor(100 * Math.pow(1.05, waveNum));
+                    speed = 100;
+                    reward = 1;
+                  } else if (type === "fast") {
+                    hp = Math.floor(60 * Math.pow(1.04, waveNum));
+                    speed = 180;
+                    reward = 1;
+                  } else if (type === "tank") {
+                    hp = Math.floor(300 * Math.pow(1.08, waveNum));
+                    speed = 60;
+                    reward = 2;
+                  }
+
+                  enemies.push({ type, hp, speed, reward, count: 1 });
+                }
+
+                return { enemies };
               }
 
               window.startWave = () => {
@@ -534,51 +553,58 @@
                 if (waveInProgress) return;
 
                 isPaused = false;
-                const waveData = generateWave(currentWave + 1);
-                const { type, count, hp, speed, reward } = waveData;
+                currentWave++;
+
+                const waveData = generateWave(currentWave);
+                let enemyQueue = [];
+
+                waveData.enemies.forEach((entry) => {
+                  for (let i = 0; i < entry.count; i++) {
+                    enemyQueue.push({ ...entry });
+                  }
+                });
 
                 waveInProgress = true;
+                allEnemiesSpawned = false;
                 document.getElementById("start-btn").disabled = true;
-                mod.startWave();
+
+                import("../ui.js").then((mod) => mod.startWave()); // optional UI trigger
 
                 let spawned = 0;
                 const spawnInterval = setInterval(() => {
                   if (isPaused) return;
 
+                  const enemy = enemyQueue[spawned];
                   enemies.push({
                     x: path[0].x,
                     y: path[0].y,
                     waypointIndex: 1,
-                    speed,
-                    hp,
-                    maxHp: hp,
-                    type,
-                    reward,
+                    speed: enemy.speed,
+                    hp: enemy.hp,
+                    maxHp: enemy.hp,
+                    type: enemy.type,
+                    reward: enemy.reward,
                   });
 
                   spawned++;
-                  if (spawned >= count) {
+                  if (spawned >= enemyQueue.length) {
                     allEnemiesSpawned = true;
                     clearInterval(spawnInterval);
                   }
                 }, 800);
-
-                currentWave++;
               };
 
-              window.togglePause = togglePause;
-              window.resumeGame = resumeGame;
-            }
-          });
 
-          document.querySelectorAll("[data-tower]").forEach((img) => {
-            img.addEventListener("dragstart", (e) => {
-              draggingTower = e.target.dataset.tower;
-              ghostImage.src = e.target.src;
-              isDragging = true;
-            });
-          });
-        });
+              document.querySelectorAll("[data-tower]").forEach((img) => {
+                img.addEventListener("dragstart", (e) => {
+                  draggingTower = e.target.dataset.tower;
+                  ghostImage.src = e.target.src;
+                  isDragging = true;
+                });
+              });    
+            }
+          });  
+        }); 
 
       canvas.addEventListener("click", (e) => {
         const rect = canvas.getBoundingClientRect();
