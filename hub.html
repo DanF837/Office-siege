@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Office Siege – Mission Hub</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="data:," />
   </head>
   <body>
     <!-- HEADER -->
@@ -138,12 +139,15 @@
             window.location.href = url;
           }
         }, 200); 
-
-        clickSound.addEventListener("canplaythrough", () => console.log("Sound loaded"));
-        clickSound.addEventListener("error", () => console.error("Sound failed to load"));
+      }
+      function startGame(event) {
+        event.preventDefault();
+        const targetLink = document
+          .getElementById("startGameLink")
+          .getAttribute("data-map");
+        if (!targetLink) return;
+        playAndNavigate(targetLink, true);
       }
     </script>
-
-
   </body>
 </html>

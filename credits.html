@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Credits – Office Siege</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:," />
 </head>
 <body class="screen">
   <h1 class="title"> Credits</h1>
@@ -13,7 +14,19 @@
   <p>Concept & design inspired by tower defense classics</p>
 
   <div class="menu-buttons">
-    <a href="index.html" class="button-link">Back to Menu</a>
+    <button onclick="playAndNavigate('index.html')" class="button-link">Back to Menu</button>
   </div>
+
+  <script>
+    const clickSound = new Audio("assets/audio/button-click.mp3");
+
+    function playAndNavigate(url) {
+      const sound = clickSound.cloneNode();
+      sound.play().catch(console.warn);
+      setTimeout(() => {
+        window.location.href = url;
+      }, 200); 
+    }
+  </script>
 </body>
 </html>

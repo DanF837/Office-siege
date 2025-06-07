@@ -22,10 +22,9 @@
 
   
     <!-- JavaScript files -->
-    <script src="ui.js"></script>
+    <script type="module" src="ui.js"></script>
     <script src="js/game.js"></script>
     <script src="js/main.js"></script>
-
 
     <script type="module" src="./js/globalAudio.js"></script>
 
@@ -38,9 +37,6 @@
         setTimeout(() => {
           window.location.href = url;
         }, 200); 
-
-        clickSound.addEventListener("canplaythrough", () => console.log("Sound loaded"));
-        clickSound.addEventListener("error", () => console.error("Sound failed to load"));
       }
     </script>
   </body>

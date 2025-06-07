@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("startBtn").focus();
+    document.getElementById("startBtn");
     document.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && document.activeElement.id === "startBtn") {
         startGame();
@@ -29,3 +29,14 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("mainMenu").style.display = "flex";
   }
   
+  document.addEventListener("DOMContentLoaded", () => {
+    const startBtn = document.getElementById("startBtn");
+    if (startBtn) {
+      startBtn.focus();
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && document.activeElement.id === "startBtn") {
+          startGame();
+        }
+      });
+    }
+  });
