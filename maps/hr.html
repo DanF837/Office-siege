@@ -209,6 +209,10 @@
     </script>
 
     <script type="module">
+
+    import { playSound } from "../js/gameAudio.js";
+
+
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
 
@@ -408,6 +412,8 @@
           if (mod.money >= cost) {
             mod.addMoney(-cost);
             selectedTower[stat + "Level"]++;
+
+            import("../js/gameAudio.js").then((audio) => audio.playSound("upgrade"));
             showUpgradeMenu(); 
           }
         });
@@ -452,6 +458,7 @@
           if (dist < moveDist) {
             p.target.hp -= p.damage;
             projectiles.splice(i, 1);
+            playSound("hit");
             continue;
           }
 
@@ -628,6 +635,8 @@
                 cooldown: 0,
                 targetMode: 'first',
               });
+
+              playSound("place");
             } else {
               showMessagePopup("Not enough money to place this tower.");
             }
@@ -798,6 +807,7 @@
             }
 
             if (target) {
+              playSound("firing");
               projectiles.push({
                 x: tower.x,
                 y: tower.y,
@@ -874,6 +884,8 @@
         import("../ui.js").then((mod) => {
           mod.addMoney(window._pendingSellRefund || 0);
         });
+
+        import("../js/gameAudio.js").then((audio) => audio.playSound("sell"));
 
         const index = towers.indexOf(selectedTower);
         if (index !== -1) towers.splice(index, 1);
