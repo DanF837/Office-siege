@@ -507,10 +507,10 @@
               function generateWave(waveNum) {
                 let type = "normal";
 
-                const hp = Math.floor(100 * Math.pow(1.1, waveNum))
-                const speed = Math.min(200, 100 + waveNum * 1.5);
-                const count = Math.floor(10 + waveNum * 1.25);
-                const reward = Math.floor(1 + waveNum * 0.4);
+                let hp = Math.floor(100 * Math.pow(1.1, waveNum))
+                let speed = Math.min(200, 100 + waveNum * 1.5);
+                let count = Math.floor(10 + waveNum * 1.25);
+                let reward = Math.floor(1 + waveNum * 0.4);
 
                 if (waveNum % 5 === 0) {
                   type = "tank";
@@ -781,7 +781,7 @@
 
       const towerStats = {
         cannon: { range: 180, damage: 25, fireRate: 1 },
-        sniper: { range: 1070, damage: 100, fireRate: 6 },
+        sniper: { range: 99999999, damage: 100, fireRate: 6 },
         shredder: { range: 180, damage: 10, fireRate: 0.25 },
       };
 
