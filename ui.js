@@ -26,12 +26,10 @@ export function loseLife() {
 }
 
 export function addMoney(amount) {
-//  console.log("[addMoney called]", amount);
   money += amount;
   updateUI();
 
   if (window.refreshUpgradeMenu) {
-//    console.log("[Calling refreshUpgradeMenu]");
     window.refreshUpgradeMenu();
   }
 }
