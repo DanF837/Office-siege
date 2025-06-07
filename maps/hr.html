@@ -139,6 +139,26 @@
       </div>
     </div>
 
+    <div id="message-popup"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.85);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 10001;
+        color: white;
+        font-family: sans-serif;
+      ">
+      <p id="message-text" style="font-size: 24px; margin-bottom: 20px;"></p>
+      <button onclick="closeMessagePopup()" style="padding: 10px 20px;">OK</button>
+    </div>
+
     <script>
       let victoryShown = false;
 
@@ -178,6 +198,13 @@
       window.showGameOver = showGameOver;
       window.retryGame = retryGame;
       window.goHome = goHome;
+      window.showMessagePopup = function (text) {
+        document.getElementById("message-text").innerText = text;
+        document.getElementById("message-popup").style.display = "flex";
+      };
+      window.closeMessagePopup = function () {
+        document.getElementById("message-popup").style.display = "none";
+      };
     </script>
 
     <script type="module">
@@ -206,6 +233,12 @@
         fast: new Image(),
         tank: new Image(),
         boss: new Image(),
+      };
+
+      const towerPrices = {
+        cannon: 100,
+        shredder: 75,
+        sniper: 150,
       };
 
       enemySprites.normal.src = "../assets/enemy/enemy_normal.png";
@@ -346,6 +379,12 @@
         }
       }
 
+      window.refreshUpgradeMenu = function () {
+        if (document.getElementById("upgrade-menu").style.display === "block") {
+          showUpgradeMenu();
+        }
+      };
+
       function hideUpgradeMenu() {
         const menu = document.getElementById("upgrade-menu");
         menu.style.display = "none";
@@ -379,14 +418,14 @@
 
         const baseCost = 100;
         const upgradeCost = 100;
-        const refund =
-          Math.floor(baseCost / 2) +
-          Math.floor(
-            ((selectedTower.rangeLevel - 1) +
-              (selectedTower.damageLevel - 1) +
-              (selectedTower.fireRateLevel - 1)) *
-              (upgradeCost / 2)
-          );
+        const basePrice = towerPrices[selectedTower.type];
+
+        const totalLevels = (selectedTower.rangeLevel - 1)
+                        + (selectedTower.damageLevel - 1)
+                        + (selectedTower.fireRateLevel - 1);
+
+        const totalSpent = basePrice + (totalLevels * upgradeCost);
+        const refund = Math.floor(totalSpent / 2);
 
         // Save refund amount for use in confirmation
         window._pendingSellRefund = refund;
@@ -432,7 +471,7 @@
           // Health bar background
           const barWidth = 40;
           const barHeight = 6;
-          const maxHp = enemyTypes[e.type]?.hp || 100;
+          const maxHp = e.maxHp || 100;
           const hpRatio = e.hp / maxHp;
 
           ctx.fillStyle = "red";
@@ -440,6 +479,9 @@
 
           ctx.fillStyle = "lime";
           ctx.fillRect(e.x - barWidth / 2, e.y - 30, barWidth * hpRatio, barHeight);
+
+          ctx.strokeStyle = "black";
+          ctx.strokeRect(e.x - barWidth / 2, e.y - 30, barWidth, barHeight);
         });
       }
 
@@ -462,87 +504,107 @@
             if (typeof mod.updateUI === "function") {
               mod.updateUI();
 
+              function generateWave(waveNum) {
+                if (waveNum === 25) {
+                  return {
+                    enemies: [
+                      {
+                        type: "boss",
+                        hp: 10000,
+                        speed: 40,
+                        reward: 1000,
+                        count: 1
+                      }
+                    ]
+                  };
+                }
+
+                const enemyTypes = ["normal", "fast", "tank"];
+                const count = Math.floor(10 + waveNum * 1.25);
+
+                const enemies = [];
+
+                for (let i = 0; i < count; i++) {
+                  const type = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+                  let hp, speed, reward;
+
+                  if (type === "normal") {
+                    hp = Math.floor(100 * Math.pow(1.05, waveNum));
+                    speed = 100;
+                    reward = 1;
+                  } else if (type === "fast") {
+                    hp = Math.floor(60 * Math.pow(1.04, waveNum));
+                    speed = 180;
+                    reward = 1;
+                  } else if (type === "tank") {
+                    hp = Math.floor(300 * Math.pow(1.08, waveNum));
+                    speed = 60;
+                    reward = 2;
+                  }
+
+                  enemies.push({ type, hp, speed, reward, count: 1 });
+                }
+
+                return { enemies };
+              }
+
               window.startWave = () => {
                 console.log("Starting new wave", currentWave + 1);
                 if (waveInProgress) return;
 
                 isPaused = false;
-                let type;
-                let wave;
+                currentWave++;
 
-                if ((currentWave + 1) === 25) {
-                  // Boss wave only
-                  type = "boss";
-                  wave = {
-                    count: 1,
-                    hp: enemyTypes.boss.hp,
-                    speed: enemyTypes.boss.speed
-                  };
-                } else if (currentWave < 50) {
-                  // Early waves
-                  if ((currentWave + 1) % 5 === 0) type = "tank";
-                  else if ((currentWave + 1) % 3 === 0) type = "fast";
-                  else type = "normal";
+                const waveData = generateWave(currentWave);
+                let enemyQueue = [];
 
-                  wave = {
-                    count: 10 + currentWave * 2,
-                    hp: enemyTypes[type].hp,
-                    speed: enemyTypes[type].speed,
-                  };
-                } else {
-                  // Harder late waves
-                  if ((currentWave + 1) % 5 === 0) type = "tank";
-                  else if ((currentWave + 1) % 3 === 0) type = "fast";
-                  else type = "normal";
-
-                  wave = {
-                    count: 110 + (currentWave - 50),
-                    hp: enemyTypes[type].hp,
-                    speed: enemyTypes[type].speed,
-                  };
-                }
+                waveData.enemies.forEach((entry) => {
+                  for (let i = 0; i < entry.count; i++) {
+                    enemyQueue.push({ ...entry });
+                  }
+                });
 
                 waveInProgress = true;
+                allEnemiesSpawned = false;
                 document.getElementById("start-btn").disabled = true;
-                mod.startWave();
+
+                import("../ui.js").then((mod) => mod.startWave()); // optional UI trigger
 
                 let spawned = 0;
                 const spawnInterval = setInterval(() => {
-                  if (isPaused) return; 
+                  if (isPaused) return;
 
+                  const enemy = enemyQueue[spawned];
                   enemies.push({
                     x: path[0].x,
                     y: path[0].y,
                     waypointIndex: 1,
-                    speed: wave.speed,
-                    hp: wave.hp,
-                    type: type,
-                    reward: enemyTypes[type].reward,
+                    speed: enemy.speed,
+                    hp: enemy.hp,
+                    maxHp: enemy.hp,
+                    type: enemy.type,
+                    reward: enemy.reward,
                   });
 
                   spawned++;
-                  if (spawned >= wave.count) {
+                  if (spawned >= enemyQueue.length) {
                     allEnemiesSpawned = true;
                     clearInterval(spawnInterval);
                   }
                 }, 800);
-
-                currentWave++;
               };
 
-              window.togglePause = togglePause;
-              window.resumeGame = resumeGame;
-            }
-          });
 
-          document.querySelectorAll("[data-tower]").forEach((img) => {
-            img.addEventListener("dragstart", (e) => {
-              draggingTower = e.target.dataset.tower;
-              ghostImage.src = e.target.src;
-              isDragging = true;
-            });
-          });
-        });
+              document.querySelectorAll("[data-tower]").forEach((img) => {
+                img.addEventListener("dragstart", (e) => {
+                  draggingTower = e.target.dataset.tower;
+                  ghostImage.src = e.target.src;
+                  isDragging = true;
+                });
+              });    
+            }
+          });  
+        }); 
 
       canvas.addEventListener("click", (e) => {
         const rect = canvas.getBoundingClientRect();
@@ -552,9 +614,28 @@
         const y = (e.clientY - rect.top) * scaleY;
 
         if (isDragging && canPlaceTower(x, y)) {
-          towers.push({x, y, type: draggingTower, level: 1, rangeLevel: 1, damageLevel: 1, fireRateLevel: 1, cooldown: 0, targetMode: 'first', });          
-          isDragging = false;
-          draggingTower = null;
+          import("../ui.js").then((mod) => {
+            const price = towerPrices[draggingTower];
+            if (mod.money >= price) {
+              mod.addMoney(-price);
+              towers.push({
+                x,
+                y,
+                type: draggingTower,
+                level: 1,
+                rangeLevel: 1,
+                damageLevel: 1,
+                fireRateLevel: 1,
+                cooldown: 0,
+                targetMode: 'first',
+              });
+            } else {
+              showMessagePopup("Not enough money to place this tower.");
+            }
+            isDragging = false;
+            draggingTower = null;
+          });
+
           return;
         }
 
@@ -663,6 +744,13 @@
           }
 
           if (t === selectedTower) {
+
+            ctx.beginPath();
+            ctx.arc(t.x, t.y, 38, 0, Math.PI * 2);
+            ctx.strokeStyle = "#00FFFF"; // Cyan or any color you like
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
             const stats = towerStats[t.type] || defaultTower;
             const range = stats.range + t.rangeLevel * 10;
             const damage = stats.damage + t.damageLevel * 10;
@@ -726,7 +814,7 @@
 
       const towerStats = {
         cannon: { range: 180, damage: 25, fireRate: 1 },
-        sniper: { range: 1070, damage: 100, fireRate: 6 },
+        sniper: { range: 99999999, damage: 100, fireRate: 6 },
         shredder: { range: 180, damage: 10, fireRate: 0.25 },
       };
 
