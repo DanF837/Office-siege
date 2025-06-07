@@ -718,6 +718,13 @@
           }
 
           if (t === selectedTower) {
+
+            ctx.beginPath();
+            ctx.arc(t.x, t.y, 38, 0, Math.PI * 2);
+            ctx.strokeStyle = "#00FFFF"; // Cyan or any color you like
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
             const stats = towerStats[t.type] || defaultTower;
             const range = stats.range + t.rangeLevel * 10;
             const damage = stats.damage + t.damageLevel * 10;
