@@ -10,21 +10,34 @@
 <body>
     <div id="mainMenu" class="screen">
       <h1 class="title">Office Siege</h1>
-      <p class="tagline">The printers are angry. The staplers have snapped. Defend your desk!</p>
+      <p class="tagline">The employees are angry. The staplers have snapped. Defend your desk!</p>
   
       <div class="menu-buttons">
-        <a href="hub.html" class="button-link">Start Game</a>
-        <a href="credits.html" class="button-link">Credits</a>
+        <button class="button-link" onclick="playAndNavigate('hub.html')">Start Game</button>
+        <button class="button-link" onclick="playAndNavigate('credits.html')">Credits</button>
       </div>
     </div>
   
     <canvas id="gameCanvas" style="display: none;"></canvas>
+
   
     <!-- JavaScript files -->
-    <script src="js/map.js"></script>
-    <script src="ui.js"></script>
+    <script type="module" src="ui.js"></script>
     <script src="js/game.js"></script>
     <script src="js/main.js"></script>
+
+    <script type="module" src="./js/globalAudio.js"></script>
+
+    <script>
+      const clickSound = new Audio("assets/audio/button-click.mp3");
+    
+      function playAndNavigate(url) {
+        const sound = clickSound.cloneNode();
+        sound.play().catch(console.warn);
+        setTimeout(() => {
+          window.location.href = url;
+        }, 200); 
+      }
+    </script>
   </body>
-  
 </html>
