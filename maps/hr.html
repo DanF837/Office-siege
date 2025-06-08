@@ -506,6 +506,15 @@
         .then((html) => {
           document.body.insertAdjacentHTML("beforeend", html);
 
+          // Attach pause handler to settings button
+          const settingsBtn = document.querySelector("#game-ui button:last-of-type");
+          if (settingsBtn) {
+            settingsBtn.addEventListener("click", () => {
+              document.getElementById("settings-popup").style.display = "flex";
+              if (typeof window.pauseGame === "function") window.pauseGame();
+            });
+          }
+
           import("../ui.js").then((mod) => {
             if (typeof mod.updateUI === "function") {
               mod.updateUI();
@@ -968,6 +977,10 @@
       };
 
       window.togglePause = togglePause;
+
+
+      window.pauseGame = () => { isPaused = true; };
+      window.resumeGame = () => { isPaused = false; };      
     </script>
   </body>
 </html>
