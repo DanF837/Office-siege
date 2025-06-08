@@ -55,3 +55,50 @@ function updateTowerAvailability() {
 document.addEventListener("DOMContentLoaded", () => {
   updateTowerAvailability();
 });
+
+
+  // Open Settings (bind this to the ⚙️ button if not already)
+document.querySelector("#game-ui button:last-of-type").addEventListener("click", () => {
+  document.getElementById("settings-popup").style.display = "flex";
+});
+
+// Close Settings
+window.closeSettings = function () {
+  document.getElementById("settings-popup").style.display = "none";
+};
+
+// Reset Progress
+window.resetProgress = function () {
+  if (confirm("Are you sure you want to reset all progress?")) {
+    localStorage.clear();
+    location.reload();
+  }
+};
+
+// Load saved settings
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("toggle-music").checked = localStorage.getItem("musicEnabled") !== "false";
+  document.getElementById("toggle-sfx").checked = localStorage.getItem("sfxEnabled") !== "false";
+
+  document.getElementById("music-volume").value = localStorage.getItem("musicVolume") || 1;
+  document.getElementById("sfx-volume").value = localStorage.getItem("sfxVolume") || 1;
+});
+
+// Save settings
+document.getElementById("toggle-music").addEventListener("change", (e) => {
+  localStorage.setItem("musicEnabled", e.target.checked);
+  // Optional: control actual music playback here
+});
+
+document.getElementById("toggle-sfx").addEventListener("change", (e) => {
+  localStorage.setItem("sfxEnabled", e.target.checked);
+});
+
+document.getElementById("music-volume").addEventListener("input", (e) => {
+  localStorage.setItem("musicVolume", e.target.value);
+  // Optional: apply to audio engine here
+});
+
+document.getElementById("sfx-volume").addEventListener("input", (e) => {
+  localStorage.setItem("sfxVolume", e.target.value);
+});
