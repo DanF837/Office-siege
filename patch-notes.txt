@@ -1,0 +1,54 @@
+Office Siege - Patch Notes
+==========================
+
+v1.0.0 - Initial Release 
+---------------------------
+ Gameplay
+- Custom 2D tower defense in a corporate office setting
+- 25 progressively harder waves including a final boss
+- Defend HR Hallway using:
+  •  Coffee Cannon
+  •  Paper Shredder
+  •  Monitor Sniper
+- Targeting modes: first, last, closest, strongest
+- Enemy types: standard, fast, tank, and boss
+
+ Towers & Strategy
+- Each tower has unique stats: Range, Damage, Fire Rate
+- Individual stat upgrades for each tower
+- Drag-and-drop tower placement with ghost preview
+- Grid-based placement with collision and path validation
+- Sell towers with partial refund
+
+ Economy & Game Flow
+- Money and life tracking system
+- Game Over and Victory screens
+- Money rewards per kill and wave
+- Upgrade menu appears on tower select
+
+ UI & UX
+- Dynamic tower panel updates based on available funds
+- Highlight available upgrades dynamically
+- Main menu, map select (mission hub), and credits screen
+- Popups for pause, upgrade, sell, victory, and loss
+
+ Audio & Settings
+- SFX: tower place, fire, hit, upgrade, and sell sounds
+- Background music loop
+- Music and SFX toggles saved via localStorage
+- Volume sliders with real-time audio adjustments
+
+ Settings Menu
+- Toggle music and SFX independently
+- Adjust volumes via slider (0–100%)
+- Optional: Reset all progress button
+- Responsive settings layout
+
+ Polishing & Misc
+- All assets preload on game start
+- Responsive layout tweaks for various screen sizes
+- Added favicon to avoid 404s in console
+- Modularized JavaScript codebase (separated UI, Audio, etc.)
+- Fixed minor bugs in drag/drop and audio volume logic
+
+Thanks for playing! 

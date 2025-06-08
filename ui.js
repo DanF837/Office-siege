@@ -40,11 +40,9 @@ function updateTowerAvailability() {
     const price = towerPrices[towerType];
     const canAfford = money >= price;
 
-    // Visually grey out
     img.style.filter = canAfford ? "none" : "grayscale(100%) opacity(0.4)";
     img.style.pointerEvents = canAfford ? "auto" : "none";
 
-    // Optional: update price label color if you use one
     const label = img.nextElementSibling;
     if (label && label.classList.contains("price-label")) {
       label.style.color = canAfford ? "#fff" : "#888";
@@ -52,62 +50,70 @@ function updateTowerAvailability() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  updateTowerAvailability();
-
-  document.getElementById("toggle-music").checked = localStorage.getItem("musicEnabled") !== "false";
-  document.getElementById("toggle-sfx").checked = localStorage.getItem("sfxEnabled") !== "false";
-
-  document.getElementById("music-volume").value = localStorage.getItem("musicVolume") || 1;
-  document.getElementById("sfx-volume").value = localStorage.getItem("sfxVolume") || 1;
-
-  updateVolumeLabel(document.getElementById("music-volume"));
-  updateVolumeLabel(document.getElementById("sfx-volume"));
-
-});
-
-
-// Open Settings (bind this to the ⚙️ button if not already)
-document.querySelector("#game-ui button:last-of-type").addEventListener("click", () => {
-  document.getElementById("settings-popup").style.display = "flex";
-});
-
-// Close Settings
-window.closeSettings = function () {
-  document.getElementById("settings-popup").style.display = "none";
-};
-
-// Reset Progress
-window.resetProgress = function () {
-  if (confirm("Are you sure you want to reset all progress?")) {
-    localStorage.clear();
-    location.reload();
-  }
-};
-
-// Save settings
-document.getElementById("toggle-music").addEventListener("change", (e) => {
-  localStorage.setItem("musicEnabled", e.target.checked);
-});
-
-document.getElementById("toggle-sfx").addEventListener("change", (e) => {
-  localStorage.setItem("sfxEnabled", e.target.checked);
-});
-
-document.getElementById("music-volume").addEventListener("input", function () {
-  localStorage.setItem("musicVolume", this.value);
-  updateVolumeLabel(this);
-});
-
-document.getElementById("sfx-volume").addEventListener("input", function () {
-  localStorage.setItem("sfxVolume", this.value);
-  updateVolumeLabel(this);
-});
-
 window.updateVolumeLabel = function (slider) {
   const labelId = slider.id + "-label";
   const label = document.getElementById(labelId);
   if (label) {
     label.textContent = Math.round(slider.value * 100) + "%";
+  }
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  updateTowerAvailability();
+
+  const toggleMusic = document.getElementById("toggle-music");
+  const toggleSfx = document.getElementById("toggle-sfx");
+  const musicVolume = document.getElementById("music-volume");
+  const sfxVolume = document.getElementById("sfx-volume");
+  const openSettingsBtn = document.querySelector("#game-ui button:last-of-type");
+
+  if (toggleMusic) {
+    toggleMusic.checked = localStorage.getItem("musicEnabled") !== "false";
+    toggleMusic.addEventListener("change", (e) => {
+      localStorage.setItem("musicEnabled", e.target.checked);
+    });
+  }
+
+  if (toggleSfx) {
+    toggleSfx.checked = localStorage.getItem("sfxEnabled") !== "false";
+    toggleSfx.addEventListener("change", (e) => {
+      localStorage.setItem("sfxEnabled", e.target.checked);
+    });
+  }
+
+  if (musicVolume) {
+    musicVolume.value = localStorage.getItem("musicVolume") || 1;
+    musicVolume.addEventListener("input", function () {
+      localStorage.setItem("musicVolume", this.value);
+      updateVolumeLabel(this);
+    });
+    updateVolumeLabel(musicVolume);
+  }
+
+  if (sfxVolume) {
+    sfxVolume.value = localStorage.getItem("sfxVolume") || 1;
+    sfxVolume.addEventListener("input", function () {
+      localStorage.setItem("sfxVolume", this.value);
+      updateVolumeLabel(this);
+    });
+    updateVolumeLabel(sfxVolume);
+  }
+
+  if (openSettingsBtn) {
+    openSettingsBtn.addEventListener("click", () => {
+      document.getElementById("settings-popup").style.display = "flex";
+    });
+  }
+});
+
+// Settings buttons
+window.closeSettings = function () {
+  document.getElementById("settings-popup").style.display = "none";
+};
+
+window.resetProgress = function () {
+  if (confirm("Are you sure you want to reset all progress?")) {
+    localStorage.clear();
+    location.reload();
   }
 };

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Patch Notes</title>
+  <link rel="icon" href="data:," />
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 40px;
+    }
+    #notes {
+      white-space: pre-wrap;
+      background: #222;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #000;
+    }
+    button {
+        display: inline-block;
+        padding: 12px 30px;
+        background-color: #8b4513;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 16px;
+        margin: 10px;
+        border: none;
+        transition: transform 0.15s ease, background-color 0.2s ease;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Patch Notes</h1>
+  <div id="notes">Loading patch notes...</div>
+
+  <button onclick="location.href='index.html'"> Back to Menu</button>
+
+  <script>
+    fetch('patch-notes.txt')
+      .then(response => response.text())
+      .then(text => {
+        document.getElementById('notes').textContent = text;
+      })
+      .catch(() => {
+        document.getElementById('notes').textContent = 'Failed to load patch notes.';
+      });
+  </script>
+
+</body>
+</html>

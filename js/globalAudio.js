@@ -19,8 +19,8 @@ window.attachClickSounds = () => {
       clickSound.currentTime = 0;
       clickSound.play().catch(() => {});
 
-      clickSound.addEventListener("canplaythrough", () => console.log("Sound loaded"));
-      clickSound.addEventListener("error", () => console.error("Sound failed to load"));
+//      clickSound.addEventListener("canplaythrough", () => console.log("Sound loaded"));
+//      clickSound.addEventListener("error", () => console.error("Sound failed to load"));
     });
   });
 };
