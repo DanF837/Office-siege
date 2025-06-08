@@ -50,8 +50,8 @@
 
     <!-- FOOTER -->
     <footer class="hub-footer">
-      <button onclick="playAndNavigate('index.html')" class="button-link" style="border: none;">Exit Game</button>
-<button id="startGameLink" class="button-link disabled" style="border: none;">Start Game</button>
+      <button onclick="window.electronAPI.exitApp()" class="button-link" style="border: none;">Exit Game</button>
+      <button id="startGameLink" class="button-link disabled" style="border: none;">Start Game</button>
     </footer>
 
 
@@ -85,7 +85,7 @@
         if (!targetLink) return;
 
         // Request fullscreen
-        const body = document.body;
+        const body = document.body; 
         if (body.requestFullscreen) {
           body.requestFullscreen().then(() => {
             window.location.href = targetLink;
