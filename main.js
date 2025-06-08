@@ -9,6 +9,7 @@ function createWindow() {
     frame: false,
     resizable: false,
     autoHideMenuBar: true,
+    icon: path.join(__dirname, "assets", "icon.ico"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
@@ -17,12 +18,12 @@ function createWindow() {
   });
 
   win.maximize();
-  win.loadFile("index.html"); 
+  win.loadFile("index.html");
 }
 
 app.whenReady().then(() => {
   createWindow();
-  
+
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
