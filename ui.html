@@ -179,12 +179,12 @@
 
     <label>
       Music Volume
-      <input type="range" id="music-volume" min="0" max="1" step="0.01" style="width: 200px; margin-left: 10px;">
+      <input type="range" id="music-volume" min="0" max="1" step="0.01" style="width: 200px; margin-left: 10px;" oninput="updateVolumeLabel(this)">
     </label>
 
     <label>
       SFX Volume
-      <input type="range" id="sfx-volume" min="0" max="1" step="0.01" style="width: 200px; margin-left: 18px;">
+      <input type="range" id="sfx-volume" min="0" max="1" step="0.01" style="width: 200px; margin-left: 18px;" oninput="updateVolumeLabel(this)">
     </label>
   </div>
 

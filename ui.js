@@ -54,10 +54,20 @@ function updateTowerAvailability() {
 
 document.addEventListener("DOMContentLoaded", () => {
   updateTowerAvailability();
+
+  document.getElementById("toggle-music").checked = localStorage.getItem("musicEnabled") !== "false";
+  document.getElementById("toggle-sfx").checked = localStorage.getItem("sfxEnabled") !== "false";
+
+  document.getElementById("music-volume").value = localStorage.getItem("musicVolume") || 1;
+  document.getElementById("sfx-volume").value = localStorage.getItem("sfxVolume") || 1;
+
+  updateVolumeLabel(document.getElementById("music-volume"));
+  updateVolumeLabel(document.getElementById("sfx-volume"));
+
 });
 
 
-  // Open Settings (bind this to the ⚙️ button if not already)
+// Open Settings (bind this to the ⚙️ button if not already)
 document.querySelector("#game-ui button:last-of-type").addEventListener("click", () => {
   document.getElementById("settings-popup").style.display = "flex";
 });
@@ -75,30 +85,29 @@ window.resetProgress = function () {
   }
 };
 
-// Load saved settings
-window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("toggle-music").checked = localStorage.getItem("musicEnabled") !== "false";
-  document.getElementById("toggle-sfx").checked = localStorage.getItem("sfxEnabled") !== "false";
-
-  document.getElementById("music-volume").value = localStorage.getItem("musicVolume") || 1;
-  document.getElementById("sfx-volume").value = localStorage.getItem("sfxVolume") || 1;
-});
-
 // Save settings
 document.getElementById("toggle-music").addEventListener("change", (e) => {
   localStorage.setItem("musicEnabled", e.target.checked);
-  // Optional: control actual music playback here
 });
 
 document.getElementById("toggle-sfx").addEventListener("change", (e) => {
   localStorage.setItem("sfxEnabled", e.target.checked);
 });
 
-document.getElementById("music-volume").addEventListener("input", (e) => {
-  localStorage.setItem("musicVolume", e.target.value);
-  // Optional: apply to audio engine here
+document.getElementById("music-volume").addEventListener("input", function () {
+  localStorage.setItem("musicVolume", this.value);
+  updateVolumeLabel(this);
 });
 
-document.getElementById("sfx-volume").addEventListener("input", (e) => {
-  localStorage.setItem("sfxVolume", e.target.value);
+document.getElementById("sfx-volume").addEventListener("input", function () {
+  localStorage.setItem("sfxVolume", this.value);
+  updateVolumeLabel(this);
 });
+
+window.updateVolumeLabel = function (slider) {
+  const labelId = slider.id + "-label";
+  const label = document.getElementById(labelId);
+  if (label) {
+    label.textContent = Math.round(slider.value * 100) + "%";
+  }
+};
