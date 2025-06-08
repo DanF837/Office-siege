@@ -11,8 +11,7 @@
     font-family: 'Segoe UI', sans-serif;
     user-select: none;
     pointer-events: none;
-  "
->
+  ">
   <!-- Top Bar -->
   <div
     style="
@@ -31,8 +30,7 @@
       pointer-events: auto;
       backdrop-filter: blur(8px);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    "
-  >
+    ">
     <!-- Stats -->
     <div style="display: flex; gap: 36px">
       <div style="display: flex; align-items: center; gap: 6px">
@@ -56,8 +54,7 @@
           background: #555;
           color: #fff;
         "
-        onclick="window.togglePause?.()"
-      >
+        onclick="window.togglePause?.()">
         Pause
       </button>
       <button
@@ -69,8 +66,7 @@
           background: #3c8aff;
           color: #fff;
         "
-        onclick="window.startWave?.()"
-      >
+        onclick="window.startWave?.()">
         Start
       </button>
       <button
@@ -80,121 +76,175 @@
           border-radius: 8px;
           background: #888;
           color: #fff;
-        "
-      >
+        ">
         ⚙️
       </button>
     </div>
   </div>
 
-<!-- Tower Panel -->
-<div
-  id="tower-panel"
-  style="
-    position: absolute;
-    top: 88px;
-    right: 40px;
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 12px;
-    pointer-events: auto;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  ">
+  <!-- Tower Panel -->
+  <div
+    id="tower-panel"
+    style="
+      position: absolute;
+      top: 88px;
+      right: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 12px;
+      pointer-events: auto;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    ">
+    <div style="display: flex; flex-direction: column; align-items: center">
+      <img
+        src="../assets/tower/coffee_cannon.png"
+        alt="Coffee Cannon"
+        title="Coffee Cannon"
+        draggable="true"
+        width="60"
+        height="60"
+        style="border-radius: 8px; cursor: grab"
+        data-tower="cannon" />
+      <span
+        class="price-label"
+        data-price="cannon"
+        style="color: white; font-size: 14px; margin-right: 15px"
+        >$100</span
+      >
+    </div>
 
-  <div style="display: flex; flex-direction: column; align-items: center;">
-    <img
-      src="../assets/tower/coffee_cannon.png"
-      alt="Coffee Cannon"
-      title="Coffee Cannon"
-      draggable="true"
-      width="60"
-      height="60"
-      style="border-radius: 8px; cursor: grab"
-      data-tower="cannon"
-    />
-    <span class="price-label" data-price="cannon" style="color: white; font-size: 14px; margin-right: 15px;">$100</span>
+    <div style="display: flex; flex-direction: column; align-items: center">
+      <img
+        src="../assets/tower/paper_shredder.png"
+        alt="Paper Shredder"
+        title="Paper Shredder"
+        draggable="true"
+        width="60"
+        height="60"
+        style="border-radius: 8px; cursor: grab"
+        data-tower="shredder" />
+      <span
+        class="price-label"
+        data-price="shredder"
+        style="color: white; font-size: 14px; margin-right: 5px"
+        >$75</span
+      >
+    </div>
+
+    <div style="display: flex; flex-direction: column; align-items: center">
+      <img
+        src="../assets/tower/monitor_sniper.png"
+        alt="Monitor Sniper"
+        title="Monitor Sniper"
+        draggable="true"
+        width="60"
+        height="60"
+        style="border-radius: 8px; cursor: grab"
+        data-tower="sniper" />
+      <span
+        class="price-label"
+        data-price="sniper"
+        style="color: white; font-size: 14px; margin-left: 5px"
+        >$150</span
+      >
+    </div>
   </div>
 
-  <div style="display: flex; flex-direction: column; align-items: center;">
-    <img
-      src="../assets/tower/paper_shredder.png"
-      alt="Paper Shredder"
-      title="Paper Shredder"
-      draggable="true"
-      width="60"
-      height="60"
-      style="border-radius: 8px; cursor: grab"
-      data-tower="shredder"
-    />
-    <span class="price-label" data-price="shredder" style="color: white; font-size: 14px; margin-right: 5px;">$75</span>
+  <!-- Settings Popup -->
+  <div
+    id="settings-popup"
+    style="
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 9999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: sans-serif;
+      color: white;
+      font-size: 24px;
+      pointer-events: auto;
+    ">
+    <p style="margin-bottom: 20px">Settings</p>
+
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+      ">
+      <label>
+        <input
+          type="checkbox"
+          id="toggle-music"
+          checked
+          style="transform: scale(1.5); margin-right: 10px" />
+        Enable Music
+      </label>
+
+      <label>
+        <input
+          type="checkbox"
+          id="toggle-sfx"
+          checked
+          style="transform: scale(1.5); margin-right: 10px" />
+        Enable SFX
+      </label>
+
+      <label>
+        Music Volume
+        <input
+          type="range"
+          id="music-volume"
+          min="0"
+          max="1"
+          step="0.01"
+          style="width: 200px; margin-left: 10px"
+          oninput="updateVolumeLabel(this)" />
+      </label>
+
+      <label>
+        SFX Volume
+        <input
+          type="range"
+          id="sfx-volume"
+          min="0"
+          max="1"
+          step="0.01"
+          style="width: 200px; margin-left: 18px"
+          oninput="updateVolumeLabel(this)" />
+      </label>
+    </div>
+
+    <div style="margin-top: 30px">
+      <button
+        onclick="resetProgress()"
+        style="
+          padding: 10px 20px;
+          background: #a00;
+          color: white;
+          margin: 10px;
+        ">
+        Reset Progress
+      </button>
+      <button
+        onclick="closeSettings()"
+        style="padding: 10px 20px; background-color: white">
+        Close
+      </button>
+      <button
+        onclick="goHome()"
+        style="padding: 10px 20px; margin: 5px; background-color: white">
+        Home
+      </button>
+    </div>
   </div>
-
-  <div style="display: flex; flex-direction: column; align-items: center;">
-    <img
-      src="../assets/tower/monitor_sniper.png"
-      alt="Monitor Sniper"
-      title="Monitor Sniper"
-      draggable="true"
-      width="60"
-      height="60"
-      style="border-radius: 8px; cursor: grab"
-      data-tower="sniper"
-    />
-    <span class="price-label" data-price="sniper" style="color: white; font-size: 14px; margin-left: 5px;">$150</span>
-  </div>
-</div>
-
-<!-- Settings Popup -->
-<div id="settings-popup"
-  style="
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0,0,0,0.85);
-    z-index: 9999;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-family: sans-serif;
-    color: white;
-    font-size: 24px;
-    pointer-events: auto;
-  ">
-  <p style="margin-bottom: 20px;">Settings</p>
-
-  <div style="display: flex; flex-direction: column; gap: 15px; align-items: flex-start;">
-    <label>
-      <input type="checkbox" id="toggle-music" style="transform: scale(1.5); margin-right: 10px;">
-      Enable Music
-    </label>
-
-    <label>
-      <input type="checkbox" id="toggle-sfx" style="transform: scale(1.5); margin-right: 10px;">
-      Enable SFX
-    </label>
-
-    <label>
-      Music Volume
-      <input type="range" id="music-volume" min="0" max="1" step="0.01" style="width: 200px; margin-left: 10px;" oninput="updateVolumeLabel(this)">
-    </label>
-
-    <label>
-      SFX Volume
-      <input type="range" id="sfx-volume" min="0" max="1" step="0.01" style="width: 200px; margin-left: 18px;" oninput="updateVolumeLabel(this)">
-    </label>
-  </div>
-
-  <div style="margin-top: 30px;">
-    <button onclick="resetProgress()" style="padding: 10px 20px; background: #a00; color: white; margin: 10px;">Reset Progress</button>
-    <button onclick="closeSettings()" style="padding: 10px 20px; background-color: white;">Close</button>
-    <button onclick="goHome()" style="padding: 10px 20px; margin: 5px; background-color: white;">Home</button>
-  </div>
-</div>
-
-
 </div>
