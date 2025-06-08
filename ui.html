@@ -144,4 +144,56 @@
     <span class="price-label" data-price="sniper" style="color: white; font-size: 14px; margin-left: 5px;">$150</span>
   </div>
 </div>
+
+<!-- Settings Popup -->
+<div id="settings-popup"
+  style="
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.85);
+    z-index: 9999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: sans-serif;
+    color: white;
+    font-size: 24px;
+    pointer-events: auto;
+  ">
+  <p style="margin-bottom: 20px;">Settings</p>
+
+  <div style="display: flex; flex-direction: column; gap: 15px; align-items: flex-start;">
+    <label>
+      <input type="checkbox" id="toggle-music" style="transform: scale(1.5); margin-right: 10px;">
+      Enable Music
+    </label>
+
+    <label>
+      <input type="checkbox" id="toggle-sfx" style="transform: scale(1.5); margin-right: 10px;">
+      Enable SFX
+    </label>
+
+    <label>
+      Music Volume
+      <input type="range" id="music-volume" min="0" max="1" step="0.01" style="width: 200px; margin-left: 10px;" oninput="updateVolumeLabel(this)">
+    </label>
+
+    <label>
+      SFX Volume
+      <input type="range" id="sfx-volume" min="0" max="1" step="0.01" style="width: 200px; margin-left: 18px;" oninput="updateVolumeLabel(this)">
+    </label>
+  </div>
+
+  <div style="margin-top: 30px;">
+    <button onclick="resetProgress()" style="padding: 10px 20px; background: #a00; color: white; margin: 10px;">Reset Progress</button>
+    <button onclick="closeSettings()" style="padding: 10px 20px; background-color: white;">Close</button>
+    <button onclick="goHome()" style="padding: 10px 20px; margin: 5px; background-color: white;">Home</button>
+  </div>
+</div>
+
+
 </div>
