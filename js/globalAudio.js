@@ -18,9 +18,6 @@ window.attachClickSounds = () => {
     btn.addEventListener("click", () => {
       clickSound.currentTime = 0;
       clickSound.play().catch(() => {});
-
-      clickSound.addEventListener("canplaythrough", () => console.log("Sound loaded"));
-      clickSound.addEventListener("error", () => console.error("Sound failed to load"));
     });
   });
 };
@@ -30,4 +27,3 @@ window.addEventListener("DOMContentLoaded", () => {
   window.playTheme();
   window.attachClickSounds();
 });
-
