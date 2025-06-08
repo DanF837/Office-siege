@@ -29,11 +29,21 @@ Built using **HTML5**, **JavaScript**, and **Electron**, this game is packaged f
 
 ## How to Install & Play (Windows)
 
+###  For Windows Users
 1. Visit the **[Office Siege GitHub Releases Page](https://github.com/DanF837/Office-siege/releases)**
-2. Download the latest `.zip` file for **Windows**.
-3. Extract the folder somewhere on your PC.
-4. Run the `OfficeSiege.exe` file inside the folder.
-5. **Play instantly — no setup or installation required!**
+2. Download the latest `OfficeSiege.exe` file listed under **Assets**
+3. Double-click the `.exe` file
+4. **Play instantly** — no install or setup required!
+
+---
+
+###  For Linux Users
+1. Visit the **[Office Siege GitHub Releases Page](https://github.com/DanF837/Office-siege/releases)**
+2. Download the `.zip` file labeled for **Linux**
+3. Extract the folder
+4. Inside, run the `OfficeSiege` binary  
+   > _(You may need to make it executable: `chmod +x OfficeSiege`)_
+5. **Launch and play!**
 
 ---
 
@@ -44,6 +54,15 @@ Built using **HTML5**, **JavaScript**, and **Electron**, this game is packaged f
 - **RAM:** 4 GB minimum
 - **Disk Space:** ~150 MB
 - **Graphics:** Integrated GPU is fine (uses HTML5 Canvas)
+- **Internet:** Not required (runs offline)
+- **Format:** Standalone `.exe` (no installer)
+
+### Linux
+- **OS:** Most 64-bit Linux distributions (tested on Linux Mint)
+- **Executable:** `OfficeSiege` binary
+- **Permissions:** May need `chmod +x OfficeSiege`
+- **Internet:** Not required
+- **Dependencies:** None (Electron bundled)
 
 ---
 
