@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const toggleSfx = document.getElementById("toggle-sfx");
   const musicVolume = document.getElementById("music-volume");
   const sfxVolume = document.getElementById("sfx-volume");
-  const openSettingsBtn = document.querySelector("#game-ui button:last-of-type");
+  const openSettingsBtn = document.getElementById("settings-btn");
 
   if (toggleMusic) {
     toggleMusic.checked = localStorage.getItem("musicEnabled") !== "false";
