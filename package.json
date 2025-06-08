@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "package-win": "electron-packager . OfficeSiege --platform=win32 --arch=x64 --out=dist --overwrite --icon=assets/icon.ico"
+    "package-win": "electron-packager . OfficeSiege --platform=win32 --arch=x64 --out=dist --overwrite --icon=assets/icon.ico",
+    "package-linux": "electron-packager . OfficeSiege --platform=linux --arch=x64 --out=dist --overwrite"
   },
   "repository": {
     "type": "git",
