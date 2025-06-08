@@ -70,11 +70,13 @@ document.addEventListener("DOMContentLoaded", () => {
 // Open Settings (bind this to the ⚙️ button if not already)
 document.querySelector("#game-ui button:last-of-type").addEventListener("click", () => {
   document.getElementById("settings-popup").style.display = "flex";
+  if (typeof window.pauseGame === "function") window.pauseGame();
 });
 
 // Close Settings
 window.closeSettings = function () {
   document.getElementById("settings-popup").style.display = "none";
+  if (typeof window.resumeGame === "function") window.resumeGame();
 };
 
 // Reset Progress
