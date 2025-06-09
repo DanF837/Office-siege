@@ -1,15 +1,72 @@
 Office Siege - Patch Notes
 ==========================
+------------------------------------------
 
-v1.0.0 - Initial Release 
+v2.0.0 - Codebase Cleanup & Bug Fixes
+--------------------------------------
+ Bug Fixes
+- Fixed Monitor Sniper having infinite range (99999999 -> 450)
+- Fixed boss enemy spawning with 10,000 HP instead of 50,000 HP
+- Boss wave now correctly references enemy type definitions
+- Fixed theme music ignoring volume slider and mute toggle
+- Music volume and enable/disable now apply in real-time
+- Fixed fragile settings button selector (now uses stable ID)
+
+ Dead Code Removed
+- Removed unused spawnEnemy() function (wave spawning uses generateWave)
+- Deleted js/game.js (unused placeholder that just drew "Office Siege Begins")
+- Deleted js/main.js (referenced non-existent UI elements)
+- Deleted maps/hr.js (stale path data with wrong coordinates)
+- Removed hidden canvas element from main menu
+- Removed commented-out drawPath() debug code
+
+ Code Organization
+- Extracted game constants into js/config.js (tower stats, enemy types, magic numbers)
+- Created shared js/navigation.js module (was copy-pasted in 3 files)
+- Consolidated dynamic imports: ui.js and gameAudio.js now imported once at top
+- Removed duplicate startGame() function in hub.html
+- Added js/globalAudio.js and js/gameAudio.js to source (were only in dist)
+
+ Inline Styles Cleanup
+- Moved all inline styles from ui.html to CSS classes in style.css
+- Moved all popup inline styles from hr.html to CSS classes
+- Moved version badge inline styles to CSS class
+- Added named CSS classes for: overlays, top bar, tower sidebar, settings,
+  upgrade panel, popups (game over, pause, victory, sell, message)
+
+ Minor Fixes
+- Fixed typo: "THis" -> "This" in game loop comment
+- Added .vs/ to .gitignore (Visual Studio IDE cache)
+- Added Patch Notes button to main menu
+- Updated README with project structure and development setup
+
+ Endless Mode
+- After defeating the Wave 25 boss, choose "Continue Playing" to keep going
+- Waves 26+ use scaled-up compositions with growing HP
+- Mini-boss spawns every 10 waves after 25 (waves 35, 45, 55, ...)
+- Wave bonus money continues scaling: $50 + wave * $10
+
+ Fast-Forward
+- New speed button (1x / 2x) in the top bar next to Pause
+- Speeds up enemy movement, tower firing, projectile travel, and spawn rate
+- Visual highlight when 2x is active
+
+ Tower Stat Tooltips
+- Hover any tower in the sidebar to see its stats before buying
+- Shows name, range, damage, fire rate, and a short description
+- Tooltip appears to the left of the sidebar
+
+------------------------------------------
+
+v1.0.0 - Initial Release
 ---------------------------
  Gameplay
 - Custom 2D tower defense in a corporate office setting
 - 25 progressively harder waves including a final boss
 - Defend HR Hallway using:
-  •  Coffee Cannon
-  •  Paper Shredder
-  •  Monitor Sniper
+  - Coffee Cannon
+  - Paper Shredder
+  - Monitor Sniper
 - Targeting modes: first, last, closest, strongest
 - Enemy types: standard, fast, tank, and boss
 
@@ -40,15 +97,8 @@ v1.0.0 - Initial Release
 
  Settings Menu
 - Toggle music and SFX independently
-- Adjust volumes via slider (0–100%)
-- Optional: Reset all progress button
+- Adjust volumes via slider (0-100%)
+- Reset all progress button
 - Responsive settings layout
 
- Polishing & Misc
-- All assets preload on game start
-- Responsive layout tweaks for various screen sizes
-- Added favicon to avoid 404s in console
-- Modularized JavaScript codebase (separated UI, Audio, etc.)
-- Fixed minor bugs in drag/drop and audio volume logic
-
-Thanks for playing! 
+Thanks for playing!

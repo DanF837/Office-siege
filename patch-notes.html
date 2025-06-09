@@ -2,43 +2,73 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Patch Notes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patch Notes – Office Siege</title>
+  <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="data:," />
   <style>
     body {
-      background: #111;
-      color: white;
-      font-family: 'Segoe UI', sans-serif;
+      background:
+        radial-gradient(circle, rgba(0, 0, 0, 0.06) 1px, transparent 1px),
+        linear-gradient(145deg, #d4c5a9, #c19a6b);
+      background-size: 14px 14px, 100% 100%;
+      color: var(--desk-brown);
+      overflow: auto;
       padding: 40px;
+      display: block;
+      width: 100vw;
+      max-width: 100%;
+      box-sizing: border-box;
     }
+
+    h1 {
+      color: var(--desk-brown);
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+    }
+
     #notes {
       white-space: pre-wrap;
-      background: #222;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #000;
+      background: var(--paper-white);
+      color: var(--desk-brown);
+      padding: 24px 32px;
+      border-radius: 6px;
+      border: 1px solid var(--paper-edge);
+      box-shadow: 1px 2px 8px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      font-size: 15px;
+      line-height: 1.6;
     }
-    button {
-        display: inline-block;
-        padding: 12px 30px;
-        background-color: #8b4513;
-        color: white;
-        text-decoration: none;
-        border-radius: 6px;
-        font-size: 16px;
-        margin: 10px;
-        border: none;
-        transition: transform 0.15s ease, background-color 0.2s ease;
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+
+    .menu-buttons {
+      margin-top: 24px;
+    }
+
+    .menu-buttons .button-link {
+      background: var(--sticky-yellow);
+      color: var(--desk-brown);
+      font-weight: 700;
+      border: none;
+      border-radius: 4px;
+      box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.12);
+    }
+
+    .menu-buttons .button-link:hover {
+      background: var(--manila-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.18);
     }
   </style>
 </head>
 <body>
-
   <h1>Patch Notes</h1>
   <div id="notes">Loading patch notes...</div>
 
-  <button onclick="location.href='index.html'"> Back to Menu</button>
+  <div class="menu-buttons">
+    <button onclick="playAndNavigate('index.html')" class="button-link">Back to Menu</button>
+  </div>
 
   <script>
     fetch('patch-notes.txt')
@@ -51,5 +81,6 @@
       });
   </script>
 
+  <script type="module" src="./js/navigation.js"></script>
 </body>
 </html>

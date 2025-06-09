@@ -40,21 +40,21 @@ function updateTowerAvailability() {
     const price = towerPrices[towerType];
     const canAfford = money >= price;
 
-    // Visually grey out
     img.style.filter = canAfford ? "none" : "grayscale(100%) opacity(0.4)";
     img.style.pointerEvents = canAfford ? "auto" : "none";
 
-    // Optional: update price label color if you use one
     const label = img.nextElementSibling;
     if (label && label.classList.contains("price-label")) {
-      label.style.color = canAfford ? "#fff" : "#888";
+      label.style.color = canAfford ? "#5C4033" : "#999";
     }
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+// Called by hr.html after ui.html has been injected into the DOM
+export function initUI() {
   updateTowerAvailability();
 
+  // Load saved settings
   document.getElementById("toggle-music").checked = localStorage.getItem("musicEnabled") !== "false";
   document.getElementById("toggle-sfx").checked = localStorage.getItem("sfxEnabled") !== "false";
 
@@ -64,14 +64,37 @@ document.addEventListener("DOMContentLoaded", () => {
   updateVolumeLabel(document.getElementById("music-volume"));
   updateVolumeLabel(document.getElementById("sfx-volume"));
 
-});
+  // Open Settings
+  document.getElementById("settings-btn").addEventListener("click", () => {
+    document.getElementById("settings-popup").style.display = "flex";
+    if (typeof window.pauseGame === "function") window.pauseGame();
+  });
 
+  // Save settings and apply in real-time
+  document.getElementById("toggle-music").addEventListener("change", (e) => {
+    localStorage.setItem("musicEnabled", e.target.checked);
+    if (typeof window.setThemeEnabled === "function") {
+      window.setThemeEnabled(e.target.checked);
+    }
+  });
 
-// Open Settings (bind this to the ⚙️ button if not already)
-document.querySelector("#game-ui button:last-of-type").addEventListener("click", () => {
-  document.getElementById("settings-popup").style.display = "flex";
-  if (typeof window.pauseGame === "function") window.pauseGame();
-});
+  document.getElementById("toggle-sfx").addEventListener("change", (e) => {
+    localStorage.setItem("sfxEnabled", e.target.checked);
+  });
+
+  document.getElementById("music-volume").addEventListener("input", function () {
+    localStorage.setItem("musicVolume", this.value);
+    updateVolumeLabel(this);
+    if (typeof window.setThemeVolume === "function") {
+      window.setThemeVolume(parseFloat(this.value));
+    }
+  });
+
+  document.getElementById("sfx-volume").addEventListener("input", function () {
+    localStorage.setItem("sfxVolume", this.value);
+    updateVolumeLabel(this);
+  });
+}
 
 // Close Settings
 window.closeSettings = function () {
@@ -81,30 +104,21 @@ window.closeSettings = function () {
 
 // Reset Progress
 window.resetProgress = function () {
-  if (confirm("Are you sure you want to reset all progress?")) {
-    localStorage.clear();
-    location.reload();
+  const popup = document.getElementById("reset-confirm-popup");
+  if (popup) {
+    popup.style.display = "flex";
   }
 };
 
-// Save settings
-document.getElementById("toggle-music").addEventListener("change", (e) => {
-  localStorage.setItem("musicEnabled", e.target.checked);
-});
+window.confirmReset = function () {
+  localStorage.clear();
+  location.reload();
+};
 
-document.getElementById("toggle-sfx").addEventListener("change", (e) => {
-  localStorage.setItem("sfxEnabled", e.target.checked);
-});
-
-document.getElementById("music-volume").addEventListener("input", function () {
-  localStorage.setItem("musicVolume", this.value);
-  updateVolumeLabel(this);
-});
-
-document.getElementById("sfx-volume").addEventListener("input", function () {
-  localStorage.setItem("sfxVolume", this.value);
-  updateVolumeLabel(this);
-});
+window.closeResetPopup = function () {
+  const popup = document.getElementById("reset-confirm-popup");
+  if (popup) popup.style.display = "none";
+};
 
 window.updateVolumeLabel = function (slider) {
   const labelId = slider.id + "-label";

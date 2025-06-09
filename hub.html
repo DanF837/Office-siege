@@ -6,11 +6,127 @@
     <title>Office Siege – Mission Hub</title>
     <link rel="stylesheet" href="style.css" />
     <link rel="icon" href="data:," />
+    <style>
+      body {
+        background:
+          radial-gradient(circle, rgba(0, 0, 0, 0.06) 1px, transparent 1px),
+          linear-gradient(145deg, #d4c5a9, #c19a6b);
+        background-size: 14px 14px, 100% 100%;
+        justify-content: flex-start;
+        width: 100vw;
+        max-width: 100%;
+      }
+
+      .hub-main {
+        max-width: 90%;
+        width: 100%;
+      }
+
+      .hub-header .title {
+        color: var(--desk-brown);
+        font-size: 2.2rem;
+      }
+
+      .hub-header .tagline {
+        color: var(--desk-brown);
+        opacity: 0.8;
+        margin-bottom: 16px;
+      }
+
+      /* Panels as paper cards */
+      .panel {
+        background: var(--paper-white);
+        border: 1px solid var(--paper-edge);
+        border-radius: 6px;
+        box-shadow: 1px 2px 8px rgba(0, 0, 0, 0.1);
+        color: var(--desk-brown);
+      }
+
+      .panel h3 {
+        color: var(--desk-brown);
+        font-weight: 700;
+        padding-bottom: 8px;
+        border-bottom: 2px dashed var(--paper-edge);
+        margin-top: 0;
+        margin-bottom: 14px;
+      }
+
+      /* Map select buttons as sticky notes */
+      .map-panel button {
+        background: var(--sticky-yellow);
+        color: var(--desk-brown);
+        font-weight: 700;
+        border: none;
+        border-radius: 4px;
+        box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.12);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .map-panel button:hover {
+        background: var(--manila-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.18);
+      }
+
+      /* Overview */
+      .overview-panel p {
+        color: var(--desk-brown);
+      }
+
+      .overview-panel hr {
+        border: none;
+        border-top: 2px dashed var(--paper-edge);
+        margin: 14px 0;
+      }
+
+      .note {
+        color: #666;
+      }
+
+      /* Tower icons */
+      .tower-icon {
+        background: var(--manila);
+        border-color: var(--paper-edge);
+      }
+
+      /* Footer buttons */
+      .hub-footer .button-link {
+        background: var(--sticky-yellow);
+        color: var(--desk-brown);
+        font-weight: 700;
+        border: none;
+        border-radius: 4px;
+        box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.12);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .hub-footer .button-link:hover:not(.disabled) {
+        background: var(--manila-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.18);
+      }
+
+      .hub-footer .button-link.disabled {
+        background: var(--manila-dark);
+        opacity: 0.5;
+      }
+
+      /* Difficulty selector in hub */
+      .difficulty-selector {
+        margin: 8px 0;
+      }
+
+      .overview-panel hr {
+        border: none;
+        border-top: 2px dashed var(--paper-edge);
+        margin: 14px 0;
+      }
+    </style>
   </head>
   <body>
     <!-- HEADER -->
     <header class="hub-header">
-      <h1 class="title"> Mission Hub</h1>
+      <h1 class="title">Mission Hub</h1>
       <p class="tagline">Select your department and prepare your loadout.</p>
     </header>
 
@@ -18,22 +134,31 @@
     <main class="hub-main">
       <!-- LEFT: MAP SELECT -->
       <section class="panel map-panel">
-        <h3> Map Select</h3>
+        <h3>Map Select</h3>
         <button onclick="selectMap('hr')">HR Hallway</button>
 <!--        <button onclick="selectMap('it')">IT Overload</button>  -->
-      </section> 
+      </section>
 
       <!-- CENTER: OVERVIEW -->
       <section class="panel overview-panel">
-        <h3> Overview</h3>
+        <h3>Overview</h3>
         <p id="mapDescription">Select a map to see its tactical overview.</p>
+        <hr />
+        <div class="difficulty-selector">
+          <span class="difficulty-label">Difficulty</span>
+          <div class="difficulty-buttons">
+            <button class="difficulty-btn" data-diff="easy" onclick="setDifficulty('easy')">Easy</button>
+            <button class="difficulty-btn active" data-diff="normal" onclick="setDifficulty('normal')">Normal</button>
+            <button class="difficulty-btn" data-diff="hard" onclick="setDifficulty('hard')">Hard</button>
+          </div>
+        </div>
         <hr />
         <p class="note">Latest News: New map "IT Overload" coming soon!</p>
       </section>
 
       <!-- RIGHT: TOWER LOADOUT -->
       <section class="panel tower-panel">
-        <h3> Towers</h3>
+        <h3>Towers</h3>
         <div class="tower-list">
           <div class="tower-icon" title="Coffee Cannon">
             <img src="assets/tower/coffee_cannon.png" alt="Coffee Cannon" />
@@ -50,10 +175,9 @@
 
     <!-- FOOTER -->
     <footer class="hub-footer">
-      <button onclick="window.electronAPI.exitApp()" class="button-link" style="border: none;">Exit Game</button>
-      <button id="startGameLink" class="button-link disabled" style="border: none;">Start Game</button>
+      <button onclick="playAndNavigate('index.html')" class="button-link">Exit Game</button>
+      <button id="startGameLink" class="button-link disabled">Start Game</button>
     </footer>
-
 
     <script>
       let selectedMap = null;
@@ -70,76 +194,11 @@
           descriptions[mapId];
         document.getElementById("startGameLink").classList.remove("disabled");
 
-        // Store the map link temporarily for use after fullscreen
         document
           .getElementById("startGameLink")
           .setAttribute("data-map", `maps/${mapId}.html`);
       }
 
-      function startGame(event) {
-        event.preventDefault();
-
-        const targetLink = document
-          .getElementById("startGameLink")
-          .getAttribute("data-map");
-        if (!targetLink) return;
-
-        // Request fullscreen
-        const body = document.body; 
-        if (body.requestFullscreen) {
-          body.requestFullscreen().then(() => {
-            window.location.href = targetLink;
-          });
-        } else if (body.webkitRequestFullscreen) {
-          body.webkitRequestFullscreen();
-          window.location.href = targetLink;
-        } else if (body.msRequestFullscreen) {
-          body.msRequestFullscreen();
-          window.location.href = targetLink;
-        } else {
-          window.location.href = targetLink;
-        }
-      }
-
-      // Attach click handler
-      document.addEventListener("DOMContentLoaded", () => {
-        const startBtn = document.getElementById("startGameLink");
-        startBtn.addEventListener("click", startGame);
-      });
-
-    </script>
-
-
-    <script type="module" src="./js/globalAudio.js"></script>
-
-    <script>
-      const clickSound = new Audio("assets/audio/button-click.mp3");
-    
-      function playAndNavigate(url, isFullscreen = false) {
-        const sound = clickSound.cloneNode();
-        sound.play().catch(console.warn);
-    
-        setTimeout(() => {
-          if (isFullscreen) {
-            const body = document.body;
-            if (body.requestFullscreen) {
-              body.requestFullscreen().then(() => {
-                window.location.href = url;
-              });
-            } else if (body.webkitRequestFullscreen) {
-              body.webkitRequestFullscreen();
-              window.location.href = url;
-            } else if (body.msRequestFullscreen) {
-              body.msRequestFullscreen();
-              window.location.href = url;
-            } else {
-              window.location.href = url;
-            }
-          } else {
-            window.location.href = url;
-          }
-        }, 200); 
-      }
       function startGame(event) {
         event.preventDefault();
         const targetLink = document
@@ -148,6 +207,27 @@
         if (!targetLink) return;
         playAndNavigate(targetLink, true);
       }
+
+      function setDifficulty(diff) {
+        localStorage.setItem("difficulty", diff);
+        document.querySelectorAll(".difficulty-btn").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.diff === diff);
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const startBtn = document.getElementById("startGameLink");
+        startBtn.addEventListener("click", startGame);
+
+        // Load saved difficulty
+        const savedDiff = localStorage.getItem("difficulty") || "normal";
+        document.querySelectorAll(".difficulty-btn").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.diff === savedDiff);
+        });
+      });
     </script>
+
+    <script type="module" src="./js/globalAudio.js"></script>
+    <script type="module" src="./js/navigation.js"></script>
   </body>
 </html>

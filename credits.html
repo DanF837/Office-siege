@@ -7,27 +7,16 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="data:," />
 </head>
-<body class="screen">
-  <h1 class="title"> Credits</h1>
-  <p>Game by Daniel!!</p>
-  <p>Built with HTML5, CSS3, and JavaScript</p>
-  <p>Concept & design inspired by tower defense classics</p>
+<body class="credits-page">
+  <div class="credits-card">
+    <h1>Credits</h1>
+    <p>Game by Daniel!!</p>
+    <p>Built with HTML5, CSS3, and JavaScript</p>
+    <p>Concept & design inspired by tower defense classics</p>
 
-  <div class="menu-buttons">
     <button onclick="playAndNavigate('index.html')" class="button-link">Back to Menu</button>
-    <button onclick="location.href='patch-notes.html'">View Patch Notes</button>
   </div>
 
-  <script>
-    const clickSound = new Audio("assets/audio/button-click.mp3");
-
-    function playAndNavigate(url) {
-      const sound = clickSound.cloneNode();
-      sound.play().catch(console.warn);
-      setTimeout(() => {
-        window.location.href = url;
-      }, 200); 
-    }
-  </script>
+  <script type="module" src="./js/navigation.js"></script>
 </body>
 </html>

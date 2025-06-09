@@ -1,103 +1,42 @@
 <!-- UI Overlay -->
 <link rel="icon" href="data:," />
-<div
-  id="game-ui"
-  style="
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1000;
-    font-family: 'Segoe UI', sans-serif;
-    user-select: none;
-    pointer-events: none;
-  ">
+<div id="game-ui" class="game-ui-overlay">
   <!-- Top Bar -->
-  <div
-    style="
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 95%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: rgba(0, 0, 0, 0.65);
-      color: white;
-      padding: 26px 32px;
-      font-size: 24px;
-      font-weight: 500;
-      pointer-events: auto;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    ">
+  <div class="top-bar">
     <!-- Stats -->
-    <div style="display: flex; gap: 36px">
-      <div style="display: flex; align-items: center; gap: 6px">
-        ❤️ <span>Lives:</span> <span id="lives">20</span>
+    <div class="stats-group">
+      <div class="stat-item">
+        <span class="stat-icon stat-icon--lives">&#9829;</span>
+        <span>Lives:</span> <span id="lives">20</span>
       </div>
-      <div style="display: flex; align-items: center; gap: 6px">
-        💰 <span>Money:</span> <span id="money">500</span>
+      <div class="stat-item">
+        <span class="stat-icon stat-icon--money">$</span>
+        <span>Money:</span> <span id="money">500</span>
       </div>
-      <div style="display: flex; align-items: center; gap: 6px">
+      <div class="stat-item">
+        <span class="stat-icon stat-icon--wave">~</span>
         <span>Wave:</span> <span id="wave">0</span>
       </div>
     </div>
 
     <!-- Controls -->
-    <div style="display: flex; gap: 12px">
-      <button
-        style="
-          padding: 6px 14px;
-          border: none;
-          border-radius: 8px;
-          background: #555;
-          color: #fff;
-        "
-        onclick="window.togglePause?.()">
-        Pause
-      </button>
-      <button
-        id="start-btn"
-        style="
-          padding: 10px 25px;
-          border: none;
-          border-radius: 8px;
-          background: #3c8aff;
-          color: #fff;
-        "
-        onclick="window.startWave?.()">
-        Start
-      </button>
-      <button
-        style="
-          padding: 10px 25px;
-          border: none;
-          border-radius: 8px;
-          background: #888;
-          color: #fff;
-        ">
-        ⚙️
-      </button>
+    <div class="controls-group">
+      <button id="speed-btn" class="btn-speed" onclick="window.toggleSpeed?.()">1x</button>
+      <button class="btn-pause" onclick="window.togglePause?.()">Pause</button>
+      <button id="start-btn" class="btn-start" onclick="window.startWave?.()">Start</button>
+      <button id="settings-btn" class="btn-settings">Settings</button>
     </div>
   </div>
 
+  <!-- Wave Preview -->
+  <div id="wave-preview" class="wave-preview" style="display:none;">
+    <p id="wave-preview-text"></p>
+  </div>
+
   <!-- Tower Panel -->
-  <div
-    id="tower-panel"
-    style="
-      position: absolute;
-      top: 88px;
-      right: 40px;
-      display: flex;
-      flex-direction: column;
-      gap: 25px;
-      background: rgba(0, 0, 0, 0.5);
-      padding: 12px;
-      pointer-events: auto;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    ">
-    <div style="display: flex; flex-direction: column; align-items: center">
+  <div id="tower-panel" class="tower-sidebar">
+    <div class="tower-slot">
+      <span class="hotkey-hint">1</span>
       <img
         src="../assets/tower/coffee_cannon.png"
         alt="Coffee Cannon"
@@ -105,17 +44,18 @@
         draggable="true"
         width="60"
         height="60"
-        style="border-radius: 8px; cursor: grab"
+        class="tower-drag-img"
         data-tower="cannon" />
-      <span
-        class="price-label"
-        data-price="cannon"
-        style="color: white; font-size: 14px; margin-right: 15px"
-        >$100</span
-      >
+      <span class="price-label" data-price="cannon">$100</span>
+      <div class="tower-tooltip">
+        <strong>Coffee Cannon</strong>
+        <span>Range: 180 | Dmg: 25 | Rate: 1.0s</span>
+        <span class="tower-tooltip-desc">Balanced damage &amp; range</span>
+      </div>
     </div>
 
-    <div style="display: flex; flex-direction: column; align-items: center">
+    <div class="tower-slot">
+      <span class="hotkey-hint">2</span>
       <img
         src="../assets/tower/paper_shredder.png"
         alt="Paper Shredder"
@@ -123,17 +63,18 @@
         draggable="true"
         width="60"
         height="60"
-        style="border-radius: 8px; cursor: grab"
+        class="tower-drag-img"
         data-tower="shredder" />
-      <span
-        class="price-label"
-        data-price="shredder"
-        style="color: white; font-size: 14px; margin-right: 5px"
-        >$75</span
-      >
+      <span class="price-label" data-price="shredder">$75</span>
+      <div class="tower-tooltip">
+        <strong>Paper Shredder</strong>
+        <span>Range: 180 | Dmg: 10 | Rate: 0.25s</span>
+        <span class="tower-tooltip-desc">Rapid fire, short range</span>
+      </div>
     </div>
 
-    <div style="display: flex; flex-direction: column; align-items: center">
+    <div class="tower-slot">
+      <span class="hotkey-hint">3</span>
       <img
         src="../assets/tower/monitor_sniper.png"
         alt="Monitor Sniper"
@@ -141,110 +82,66 @@
         draggable="true"
         width="60"
         height="60"
-        style="border-radius: 8px; cursor: grab"
+        class="tower-drag-img"
         data-tower="sniper" />
-      <span
-        class="price-label"
-        data-price="sniper"
-        style="color: white; font-size: 14px; margin-left: 5px"
-        >$150</span
-      >
+      <span class="price-label" data-price="sniper">$150</span>
+      <div class="tower-tooltip">
+        <strong>Monitor Sniper</strong>
+        <span>Range: &infin; | Dmg: 100 | Rate: 6.0s</span>
+        <span class="tower-tooltip-desc">High damage, infinite range (blocked by obstacles)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset Confirm Popup -->
+  <div id="reset-confirm-popup" class="overlay overlay-top">
+    <p class="sell-message">Reset all progress? This cannot be undone.</p>
+    <div class="popup-btn-row">
+      <button onclick="confirmReset()" class="popup-btn-danger">Yes, Reset</button>
+      <button onclick="closeResetPopup()" class="popup-btn">Cancel</button>
     </div>
   </div>
 
   <!-- Settings Popup -->
-  <div
-    id="settings-popup"
-    style="
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.85);
-      z-index: 9999;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-family: sans-serif;
-      color: white;
-      font-size: 24px;
-      pointer-events: auto;
-    ">
-    <p style="margin-bottom: 20px">Settings</p>
+  <div id="settings-popup" class="settings-overlay">
+    <div class="settings-content">
+      <div class="settings-header">
+        <p class="settings-title">Settings</p>
+      </div>
 
-    <div
-      style="
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        align-items: flex-start;
-      ">
-      <label>
-        <input
-          type="checkbox"
-          id="toggle-music"
-          checked
-          style="transform: scale(1.5); margin-right: 10px" />
-        Enable Music
-      </label>
+      <div class="settings-body">
+        <div class="settings-controls">
+          <label>
+            <input type="checkbox" id="toggle-music" checked class="settings-checkbox" />
+            Enable Music
+          </label>
 
-      <label>
-        <input
-          type="checkbox"
-          id="toggle-sfx"
-          checked
-          style="transform: scale(1.5); margin-right: 10px" />
-        Enable SFX
-      </label>
+          <label>
+            <input type="checkbox" id="toggle-sfx" checked class="settings-checkbox" />
+            Enable SFX
+          </label>
 
-      <label>
-        Music Volume
-        <input
-          type="range"
-          id="music-volume"
-          min="0"
-          max="1"
-          step="0.01"
-          style="width: 200px; margin-left: 10px"
-          oninput="updateVolumeLabel(this)" />
-      </label>
+          <label>
+            Music Volume
+            <input type="range" id="music-volume" min="0" max="1" step="0.01"
+              class="settings-slider" oninput="updateVolumeLabel(this)" />
+          </label>
 
-      <label>
-        SFX Volume
-        <input
-          type="range"
-          id="sfx-volume"
-          min="0"
-          max="1"
-          step="0.01"
-          style="width: 200px; margin-left: 18px"
-          oninput="updateVolumeLabel(this)" />
-      </label>
-    </div>
+          <label>
+            SFX Volume
+            <input type="range" id="sfx-volume" min="0" max="1" step="0.01"
+              class="settings-slider" oninput="updateVolumeLabel(this)" />
+          </label>
+        </div>
+      </div>
 
-    <div style="margin-top: 30px">
-      <button
-        onclick="resetProgress()"
-        style="
-          padding: 10px 20px;
-          background: #a00;
-          color: white;
-          margin: 10px;
-        ">
-        Reset Progress
-      </button>
-      <button
-        onclick="closeSettings()"
-        style="padding: 10px 20px; background-color: white">
-        Close
-      </button>
-      <button
-        onclick="goHome()"
-        style="padding: 10px 20px; margin: 5px; background-color: white">
-        Home
-      </button>
+      <div class="settings-footer">
+        <div class="settings-buttons">
+          <button onclick="resetProgress()" class="btn-reset">Reset Progress</button>
+          <button onclick="closeSettings()" class="btn-close">Close</button>
+          <button onclick="goHome()" class="btn-home">Home</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

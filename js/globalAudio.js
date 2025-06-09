@@ -1,7 +1,10 @@
 // Play theme music
 const themeAudio = new Audio("../assets/audio/main-theme.mp3");
 themeAudio.loop = true;
-themeAudio.volume = 0.5;
+
+// Read saved volume from localStorage (default 0.5)
+const savedVolume = localStorage.getItem("musicVolume");
+themeAudio.volume = savedVolume !== null ? parseFloat(savedVolume) : 0.5;
 
 window.playTheme = () => {
   if (themeAudio.paused) {
@@ -9,21 +12,23 @@ window.playTheme = () => {
   }
 };
 
-// Button click sound
-const clickSound = new Audio("../assets/audio/button-click.mp3");
-clickSound.volume = 0.4;
-
-window.attachClickSounds = () => {
-  document.querySelectorAll("button").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      clickSound.currentTime = 0;
-      clickSound.play().catch(() => {});
-    });
-  });
+// Expose setter so ui.js can update volume in real-time
+window.setThemeVolume = (vol) => {
+  themeAudio.volume = vol;
 };
 
-// Auto-play on load
+window.setThemeEnabled = (enabled) => {
+  if (enabled) {
+    themeAudio.play().catch(() => {});
+  } else {
+    themeAudio.pause();
+  }
+};
+
+// Auto-play on load if music is enabled
 window.addEventListener("DOMContentLoaded", () => {
-  window.playTheme();
-  window.attachClickSounds();
+  const musicEnabled = localStorage.getItem("musicEnabled") !== "false";
+  if (musicEnabled) {
+    window.playTheme();
+  }
 });
